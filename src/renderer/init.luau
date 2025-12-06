@@ -2,6 +2,7 @@ local Signal = require("@signal")
 local rl = require("@raylib")
 
 local Skybox = require("./renderer/skybox")
+local Mesh = require("./renderer/mesh")
 
 local task = zune.task
 local mem = zune.mem
@@ -32,6 +33,37 @@ local camera = rl.Camera3D:new({
     fovy = 70,
     projection = rl.CAMERA_PERSPECTIVE,
 })
+
+local function EulerToAxisAngleRad(euler: Vector3): (vector, number)
+	local cx, sx = math.cos(euler.X / 2), math.sin(euler.X / 2)
+	local cy, sy = math.cos(euler.Y / 2), math.sin(euler.Y / 2)
+	local cz, sz = math.cos(euler.Z / 2), math.sin(euler.Z / 2)
+
+	-- Quaternion multiplication: q = qz * qy * qx
+	local qw = cz * cy * cx + sz * sy * sx
+	local qx = cz * cy * sx - sz * sy * cx
+	local qy = cz * sy * cx + sz * cy * sx
+	local qz = sz * cy * cx - cz * sy * sx
+
+	local angle = 2 * math.acos(math.clamp(qw, -1, 1))
+	local s = math.sqrt(1 - qw * qw)
+	if s < 0.0001 then
+		-- If s is near zero, axis direction is arbitrary
+		return vector.create(1, 0, 0), 0
+	else
+		return vector.create(qx / s, qy / s, qz / s), angle
+	end
+end
+
+local function Color3ToRaylib(c, transparency)
+	local r, g, b = c:ToRGB()
+	return rl.Color:new({
+		r = r,
+		g = g,
+		b = b,
+		a = math.floor(255 * (1 - transparency)),
+	})
+end
 
 function renderer.UpdateFreecam(camera: rl.Camera3D, delta: number)
     local mouseDelta = rl.GetMouseDelta()
@@ -93,6 +125,32 @@ function renderer.UpdateFreecam(camera: rl.Camera3D, delta: number)
     mem.writeVector3(camera, 12, target)
 end
 
+function renderer.DrawModel(model, part)
+    local axis, angle = EulerToAxisAngleRad(part.Rotation)
+
+    local position = vector.create(part.Position.X, part.Position.Y, part.Position.Z)
+    local scale = vector.create(part.Size.X, part.Size.Y, part.Size.Z)
+    local tint = Color3ToRaylib(part.Color, part.Transparency)
+
+    rl.DrawModelEx(
+        model, 
+        position, 
+        axis, 
+        angle, 
+        scale, 
+        tint
+    )
+end
+local function DrawPart(part)
+    if part.ClassName == "MeshPart" then
+        --renderer.DrawModel(Mesh.GetMesh(part.Shape), part)
+    else
+        renderer.DrawModel(Mesh.Get(part.Shape), part)
+    end
+
+    renderer.MainSignal:Fire("Rendered", part)
+end
+
 function renderer.SetTargetFPS(fps: number)
     renderer.TargetFPS = fps
     rl.SetTargetFPS(fps)
@@ -104,11 +162,13 @@ function renderer.AddToRenderPool(data)
 end
 
 function renderer.OnStart()
-    --Skybox.Load()
+    Mesh.Load()
+    Skybox.Load()
 end
 
 function renderer.OnEnd()
-    --Skybox.Unload()
+    Mesh.Unload()
+    Skybox.Unload()
 end
 
 function renderer.RenderScene()
@@ -121,12 +181,12 @@ function renderer.RenderScene()
 
         renderer.UpdateFreecam(camera, delta)
         do rl.BeginMode3D(camera)
-            --Skybox.Render()
+            Skybox.Draw()
             rl.DrawGrid(1024, 1)
             
             for _, part in renderer.RenderPool do
                 local part = part()
-                rl.DrawCube(vector.create(part.Position.X, part.Position.Y, part.Position.Z), 1, 1, 1, rl.WHITE)
+                DrawPart(part)
             end
 
         end; rl.EndMode3D()
