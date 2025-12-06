@@ -9,10 +9,7 @@ local mem = zune.mem
 
 local renderer = {}
 
-renderer.WindowFlags = rl.FLAG_WINDOW_RESIZABLE
-renderer.TargetFPS = 360
-
-renderer.CAMERA_SPEED = 25
+renderer.CAMERA_SPEED = 500
 renderer.MOUSE_SENSITIVITY = 0.008
 
 local worldUp = vector.create(0, 1, 0)
@@ -36,17 +33,68 @@ local function DrawTextOutlined(text:string, posX:number, posY:number, fontSize:
     rl.DrawText(text, posX, posY, fontSize, color);
 end
 
+local function ShouldDrawPart(part, camera, cam_pos, cam_target, cam_fovy)
+    local cx, cy, cz = part.Position.X, part.Position.Y, part.Position.Z
+    local pos = vector.create(cx, cy, cz)
+
+    local sx, sy, sz = part.Size.X, part.Size.Y, part.Size.Z
+    local radius = vector.magnitude(vector.create(sx, sy, sz))*0.5
+
+    local toPart = pos - cam_pos
+    local dist = vector.magnitude(toPart)
+
+    if dist > radius * 600 then
+        return false
+    end
+
+    if dist < radius then
+        return true
+    end
+
+    local forward = cam_target - cam_pos
+    local fwdLen = vector.magnitude(forward)
+    if fwdLen < 0.0001 then
+        return true
+    end
+    forward = forward / fwdLen
+
+    if vector.dot(forward, toPart) <= -radius then
+        return false
+    end
+
+    local screen = rl.GetWorldToScreen(pos, camera)
+    local w = rl.GetScreenWidth()
+    local h = rl.GetScreenHeight()
+
+    if screen.x >= -radius and screen.x <= w + radius
+       and screen.y >= -radius and screen.y <= h + radius then
+        return true
+    end
+
+    local projected_size =
+        radius / dist * (h / math.tan(math.rad(cam_fovy*0.5)))
+
+    if projected_size >= 1 then
+        return true
+    end
+
+    return false
+end
+
 local camera_position = vector.create(0, 2, -5)
 local camera_yaw = 0
 local camera_pitch = 0
+local camera_fovy = 70
+local camera_target = vector.create(0, 2, 0)
 local camera_rotatingCamera = false
 local camera_warpingThisFrame = false
 local mouse_anchorPos = vector.create(0, 0)
+
 local camera = rl.Camera3D:new({
     position = vector.create(0, 2, -5),
     target = vector.create(0, 2, 0),
     up = vector.create(0, 1, 0),
-    fovy = 70,
+    fovy = camera_fovy,
     projection = rl.CAMERA_PERSPECTIVE,
 })
 
@@ -136,9 +184,9 @@ function renderer.UpdateFreecam(camera: rl.Camera3D, delta: number)
     camera_position += right * (inputSideway * moveSpeed)
     camera_position += up * (inputUpward * moveSpeed)
 
-    local target = camera_position + forward
+    camera_target = camera_position + forward
     mem.writeVector3(camera, 0, camera_position)
-    mem.writeVector3(camera, 12, target)
+    mem.writeVector3(camera, 12, camera_target)
 end
 
 function renderer.DrawModel(model, part)
@@ -168,11 +216,6 @@ local function DrawPart(part)
     renderer.MainSignal:Fire("Rendered", part)
 end
 
-function renderer.SetTargetFPS(fps: number)
-    renderer.TargetFPS = fps
-    rl.SetTargetFPS(fps)
-end
-
 function renderer.AddToRenderPool(data)
     table.insert(renderer.RenderPool3D, data)
     renderer.MainSignal:Fire("AddedObjectToRenderPool3D", data())
@@ -196,6 +239,11 @@ function renderer.RenderScene()
     do rl.BeginDrawing()
         rl.ClearBackground(rl.BLUE)
 
+        local width = rl.GetScreenWidth()
+        local height = rl.GetScreenHeight()
+
+        local actuallyDrawn3d = 0
+
         renderer.UpdateFreecam(camera, delta)
         do rl.BeginMode3D(camera)
             --Skybox.Draw(camera_position)
@@ -206,14 +254,19 @@ function renderer.RenderScene()
                     table.remove(renderer.RenderPool3D, i)
                     continue 
                 end
-                
-                DrawPart(part)
+
+                if ShouldDrawPart(part, camera, camera_position, camera_target, camera_fovy) then
+                    DrawPart(part)
+                    actuallyDrawn3d += 1
+                end
             end
+
         end; rl.EndMode3D()
 
         DrawTextOutlined(tostring(rl.GetFPS()) .. " FPS", 10, 10, 20, rl.GREEN, 2, rl.BLACK)
         DrawTextOutlined(tostring(task.count()) .. " tasks", 10, 30, 20, rl.WHITE, 2, rl.BLACK)
         DrawTextOutlined(tostring(#renderer.RenderPool3D) .. " render pool", 10, 50, 20, rl.WHITE, 2, rl.BLACK)
+        DrawTextOutlined(tostring(actuallyDrawn3d) .. " drawn parts", 10, 70, 20, rl.WHITE, 2, rl.BLACK)
 
     end; rl.EndDrawing()
 
