@@ -167,8 +167,8 @@ function renderer.OnStart()
 end
 
 function renderer.OnEnd()
-    Mesh.Unload()
     Skybox.Unload()
+    Mesh.Unload()
 end
 
 function renderer.RenderScene()
