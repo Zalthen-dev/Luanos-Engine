@@ -5,6 +5,8 @@
         "renderer": "./src/renderer/init",
         
         "registry": "./src/environment/class/Registry",
+
+        "assets": "./src/assets",
         
         "DataModel": "./src/environment/game",
         "Instance": "./src/environment/class/Instance",
