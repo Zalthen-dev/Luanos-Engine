@@ -46,7 +46,6 @@ local InstanceMetatable = {
     end
 }
 
-
 function Instance.new(className)
     local self = {
         ClassName = className,
@@ -57,6 +56,7 @@ function Instance.new(className)
 
         ChildAdded = Signal.new(),
         Changed = Signal.new(),
+		Destroying = Signal.new(),
 
         _props = {
             ClassName = className,
@@ -188,6 +188,7 @@ function Instance:ClearAllChildren()
 end
 
 function Instance:Destroy()
+	self.Destroying:Fire()
 	if self.Parent then
 		for i, child in ipairs(self.Parent.Children) do
 			if child == self then
@@ -196,12 +197,16 @@ function Instance:Destroy()
 			end
 		end
 	end
+	
+	table.clear(self._props)
+	self._props = nil
 
 	self.Parent = nil
-	self._props = nil
 	self.Children = nil
-	self.Destroyed = true
-end
+	self.Changed = nil
 
+	table.clear(self)
+	rawset(self, "Destroyed", true)
+end
 
 return Instance
