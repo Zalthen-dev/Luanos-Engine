@@ -114,6 +114,7 @@ local text = require("@self/text");
 local models = require("@self/models");
 local audio = require("@self/audio");
 local rlgl = require("@self/rlgl")
+local rmath = require("@self/rmath")
 
 local function combine(...: {[string]: any})
     local list = {...};
@@ -131,7 +132,7 @@ end
 local export = {};
 
 export.const = raylib;
-export.lib = ffi.dlopen(LIBRARY_PATH, combine(core.def, shapes.def, textures.def, text.def, audio.def, models.def, rlgl.def)) :: {
+export.lib = ffi.dlopen(LIBRARY_PATH, combine(core.def, shapes.def, textures.def, text.def, audio.def, models.def, rlgl.def, rmath.defs)) :: {
     GetSymbol: (self: FFILibrary, symbol: string) -> FFIPointer?,
 } & core.Fns & shapes.Fns & textures.Fns & text.Fns & audio.Fns & models.Fns;
 
