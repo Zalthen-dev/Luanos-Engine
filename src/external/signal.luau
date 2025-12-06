@@ -1,8 +1,6 @@
--- KineticaSignal.lua
 local Signal = {}
 Signal.__index = Signal
 
--- connection object
 local Connection = {}
 Connection.__index = Connection
 
@@ -34,10 +32,13 @@ end
 
 function Connection:Fire(...)
 	if self.Connected and self._fn then
-		local ok, err = pcall(self._fn, ...)
-		if not ok then
-			print(err)
-		end
+		local args = {...}
+		zune.task.spawn(function()
+			local ok, err = pcall(self._fn, unpack(args))
+			if not ok then
+				print(err)
+			end
+		end)
 	end
 end
 
