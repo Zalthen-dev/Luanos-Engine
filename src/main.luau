@@ -36,17 +36,31 @@ execute("./src/sandboxed/test.luau", "file")
 rl.SetConfigFlags(rl.FLAG_WINDOW_RESIZABLE)
 rl.InitWindow(1200, 800, "Luanos Engine")
 rl.SetTargetFPS(360)
+rl.rlSetClipPlanes(0.01, 32768)
 
---rl.SetExitKey(rl.KEY_NULL)
+local lastWindowIsFocused = rl.IsWindowFocused()
 
 renderer.OnStart()
 while rl.WindowShouldClose() == 0 do
+	local windowIsFocused = rl.IsWindowFocused()
+	if lastWindowIsFocused ~= windowIsFocused then
+		if windowIsFocused == 1 then
+			rl.SetTargetFPS(360)
+		else
+			rl.SetTargetFPS(10)
+		end
+	end
+
     renderer.RenderScene()
+	lastWindowIsFocused = windowIsFocused
 end
 
-for _, currentThread in threads do
-    task.cancel(currentThread)
+if #threads > 0 then
+	for _, currentThread in threads do
+    	task.cancel(currentThread)
+	end
 end
 
 renderer.OnEnd()
 rl.CloseWindow()
+zune.process.exit(0)
