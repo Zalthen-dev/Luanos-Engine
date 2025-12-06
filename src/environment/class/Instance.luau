@@ -20,6 +20,9 @@ local InstanceMetatable = {
 	    if key == "Parent" then
 	        local oldParent = props.Parent
 	        if oldParent then
+				oldParent.ChildRemoved:Fire(self)
+				oldParent.DescendantRemoving:Fire(self)
+
 			    for i, child in ipairs(oldParent.Children) do
 			        if child == self then
 				        table.remove(oldParent.Children, i)
@@ -32,9 +35,8 @@ local InstanceMetatable = {
 	        if value then
 		        table.insert(value.Children, self)
 
-			    if value.ChildAdded then
-			        value.ChildAdded:Fire(self)
-		        end
+			    value.ChildAdded:Fire(self)
+				value.DescendantAdded:Fire(self)
 	        end
         else
 		    props[key] = value
@@ -54,9 +56,18 @@ function Instance.new(className)
         UniqueId = math.random(1, 9999999),
         Children = {},
 
+		Attributes = {},
+		Tags = {},
+
         ChildAdded = Signal.new(),
+		DescendantAdded = Signal.new(),
+		ChildRemoved = Signal.new(),
+		DescendantRemoving = Signal.new(),
+
         Changed = Signal.new(),
 		Destroying = Signal.new(),
+
+		AttributeChanged = Signal.new(),
 
         _props = {
             ClassName = className,
@@ -97,7 +108,6 @@ function Instance:FindFirstChild(name)
 	end
 	return nil
 end
-
 
 function Instance:FindFirstChildOfClass(className)
 	for _, child in ipairs(self.Children) do
@@ -179,6 +189,41 @@ function Instance:Clone()
 	return copy
 end
 
+-- attributes
+function Instance:GetAttributes()
+	return table.clone(self.Attributes)
+end
+
+function Instance:GetAttribute(attribute:string)
+	return self.Attributes[attribute]
+end
+
+function Instance:SetAttribute(attribute:string, value)
+	self.Attributes[attribute] = value
+end
+
+-- tags
+function Instance:GetTags()
+	return table.clone(self.Tags)
+end
+
+function Instance:AddTag(tag:string)
+	if not table.find(self.Tags) then
+		table.insert(self.Tags, tag)
+	end
+end
+
+function Instance:RemoveTag(tag:string)
+	local indice = table.find(self.Tags, tag)	
+	if indice then
+		table.remove(self.Tags, indice)
+	end
+end
+
+function Instance:HasTag(tag:string):boolean
+	return (table.find(self.Tags, tag) ~= nil)
+end
+
 function Instance:ClearAllChildren()
 	for _, child in ipairs(self.Children) do
         child:Destroy()
@@ -190,6 +235,9 @@ end
 function Instance:Destroy()
 	self.Destroying:Fire()
 	if self.Parent then
+		self.Parent.ChildRemoved:Fire(self)
+		self.Parent.DescendantRemoving:Fire(self)
+
 		for i, child in ipairs(self.Parent.Children) do
 			if child == self then
 				table.remove(self.Parent.Children, i)
