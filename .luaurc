@@ -1,0 +1,19 @@
+{
+    "aliases": {
+        "raylib": "./src/external/raylib",
+        "signal": "./src/external/signal",
+        "renderer": "./src/renderer/init",
+        
+        "registry": "./src/environment/class/Registry",
+        
+        "DataModel": "./src/environment/game",
+        "Instance": "./src/environment/class/Instance",
+
+        "CFrame": "./src/environment/datatypes/CFrame",
+        "Color3": "./src/environment/datatypes/Color3",
+        "Ray": "./src/environment/datatypes/Ray",
+        "UDim": "./src/environment/datatypes/UDim",
+        "UDim2": "./src/environment/datatypes/UDim2",
+        "Vector3": "./src/environment/datatypes/Vector3"
+    }
+}
