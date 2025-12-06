@@ -18,7 +18,23 @@ renderer.MOUSE_SENSITIVITY = 0.008
 local worldUp = vector.create(0, 1, 0)
 
 renderer.MainSignal = Signal.new()
-renderer.RenderPool = {}
+renderer.RenderPool3D = {}
+renderer.RenderPool2D = {}
+
+local function DrawTextOutlined(text:string, posX:number, posY:number, fontSize:number, color: rl.Color, outlineSize:number, outlineColor:rl.Color)
+    rl.DrawText(text, posX - outlineSize, posY - outlineSize, fontSize, outlineColor);
+    rl.DrawText(text, posX, posY - outlineSize, fontSize, outlineColor);
+    rl.DrawText(text, posX + outlineSize, posY - outlineSize, fontSize, outlineColor);
+
+    rl.DrawText(text, posX - outlineSize, posY, fontSize, outlineColor);
+    rl.DrawText(text, posX + outlineSize, posY, fontSize, outlineColor);
+
+    rl.DrawText(text, posX - outlineSize, posY + outlineSize, fontSize, outlineColor);
+    rl.DrawText(text, posX, posY + outlineSize, fontSize, outlineColor);
+    rl.DrawText(text, posX + outlineSize, posY + outlineSize, fontSize, outlineColor);
+
+    rl.DrawText(text, posX, posY, fontSize, color);
+end
 
 local camera_position = vector.create(0, 2, -5)
 local camera_yaw = 0
@@ -141,6 +157,7 @@ function renderer.DrawModel(model, part)
         tint
     )
 end
+
 local function DrawPart(part)
     if part.ClassName == "MeshPart" then
         --renderer.DrawModel(Mesh.GetMesh(part.Shape), part)
@@ -157,18 +174,18 @@ function renderer.SetTargetFPS(fps: number)
 end
 
 function renderer.AddToRenderPool(data)
-    table.insert(renderer.RenderPool, data)
-    renderer.MainSignal:Fire("AddedObjectToRenderPool", data())
+    table.insert(renderer.RenderPool3D, data)
+    renderer.MainSignal:Fire("AddedObjectToRenderPool3D", data())
 end
 
 function renderer.OnStart()
     Mesh.Load()
-    Skybox.Load()
+    --Skybox.Load()
 end
 
 function renderer.OnEnd()
-    Skybox.Unload()
     Mesh.Unload()
+    --Skybox.Unload()
 end
 
 function renderer.RenderScene()
@@ -177,23 +194,26 @@ function renderer.RenderScene()
 
     renderer.MainSignal:Fire("PreRender", delta)
     do rl.BeginDrawing()
-        rl.ClearBackground(rl.BLACK)
+        rl.ClearBackground(rl.BLUE)
 
         renderer.UpdateFreecam(camera, delta)
         do rl.BeginMode3D(camera)
-            Skybox.Draw()
-            rl.DrawGrid(1024, 1)
+            --Skybox.Draw(camera_position)
             
-            for _, part in renderer.RenderPool do
+            for i, part in renderer.RenderPool3D do
                 local part = part()
+                if not part.Children or part.Destroyed then 
+                    table.remove(renderer.RenderPool3D, i)
+                    continue 
+                end
+                
                 DrawPart(part)
             end
-
         end; rl.EndMode3D()
 
-        rl.DrawFPS(10, 10)
-        rl.DrawText(tostring(task.count()) .. " tasks", 10, 30, 20, rl.WHITE)
-        rl.DrawText(tostring(#renderer.RenderPool) .. " render pool", 10, 50, 20, rl.WHITE)
+        DrawTextOutlined(tostring(rl.GetFPS()) .. " FPS", 10, 10, 20, rl.GREEN, 2, rl.BLACK)
+        DrawTextOutlined(tostring(task.count()) .. " tasks", 10, 30, 20, rl.WHITE, 2, rl.BLACK)
+        DrawTextOutlined(tostring(#renderer.RenderPool3D) .. " render pool", 10, 50, 20, rl.WHITE, 2, rl.BLACK)
 
     end; rl.EndDrawing()
 
