@@ -1,135 +1,60 @@
---!strict
 local rl = require("@raylib")
+
+local ffi = zune.ffi
+local mem = zune.mem
 
 local skybox = {}
 skybox._loaded = false
 
--- Shader uniform locations
-skybox.uInner = -1
-skybox.uOuter = -1
-skybox.uEnvMap = -1
+local function PutCubemapOntoModel(model, texture, mapType)
+    local materials = ffi.ptrFromAddress(mem.slice(model, rl.Model:offset("materials"), 8))
+    local maps = materials:readptr(rl.Material:offset("maps"))
 
--- Shader sources
-skybox.SKY_VS = [[
-#version 330
-in vec3 vertexPosition;
-out vec3 dir;
-uniform mat4 matView;
-uniform mat4 matProjection;
+    maps:write(mapType or rl.MATERIAL_MAP_CUBEMAP, texture, 0, rl.TextureCubemap:size())
+end
 
-void main() {
-    dir = vertexPosition;
-    mat3 R = mat3(matView);
-    mat4 viewNoTrans = mat4(
-        vec4(R[0], 0.0),
-        vec4(R[1], 0.0),
-        vec4(R[2], 0.0),
-        vec4(0.0, 0.0, 0.0, 1.0)
-    );
-    gl_Position = matProjection * viewNoTrans * vec4(vertexPosition, 1.0);
-}
-]]
-
-skybox.SKY_FS = [[
-#version 330
-in vec3 dir;
-out vec4 FragColor;
-
-uniform vec3 innerColor;
-uniform vec3 outerColor;
-uniform samplerCube environmentMap;
-
-void main() {
-    vec3 nd = normalize(dir);
-    float t = clamp(nd.y * 0.5 + 0.5, 0.0, 1.0);
-    vec3 col = mix(innerColor, outerColor, t);
-
-    // sample cubemap (optional, can be used to mix)
-    vec3 env = texture(environmentMap, nd).rgb;
-    col = mix(col, env, 0.5);
-
-    // gamma correction
-    FragColor = vec4(pow(col, vec3(1.0/2.2)), 1.0);
-}
-]]
-
-skybox.SkyObject = {
-    Mesh = nil,
-    Shader = nil,
-    Cubemap = nil
-}
-
--- Load the skybox
 function skybox.Load()
-    if skybox._loaded then return end
+    assert(not skybox._loaded, "attempted to load skybox after already loading it")
 
-    -- Cube mesh
-    skybox.SkyObject.Mesh = rl.GenMeshCube(1, 1, 1)
+    skybox.Mesh = rl.GenMeshCube(1, 1, 1)
+    skybox.Model = rl.LoadModelFromMesh(skybox.Mesh)
+    skybox.Image = rl.LoadImage("./src/assets/sky/sky_default.png")
+    skybox.CubeMap = rl.LoadTextureCubemap(skybox.Image, rl.CUBEMAP_LAYOUT_AUTO_DETECT)
 
-    -- Shader
-    skybox.SkyObject.Shader = rl.LoadShaderFromMemory(skybox.SKY_VS, skybox.SKY_FS)
-
-    -- TODO: load your 6 skybox textures here
-    -- Example:
-    -- local cubemapFiles = { "right.png", "left.png", "top.png", "bottom.png", "front.png", "back.png" }
-    -- skybox.SkyObject.Cubemap = rl.LoadTextureCubemap(cubemapFiles, rl.CUBEMAP_LAYOUT_AUTO)
-    -- For now, we just create an empty cubemap placeholder
-    skybox.SkyObject.Cubemap = rl.LoadTextureCubemap({
-        "right.png", "left.png", "top.png", "bottom.png", "front.png", "back.png"
-    }, rl.CUBEMAP_LAYOUT_AUTO_DETECT)
-
-    -- Uniform locations
-    skybox.uInner = rl.GetShaderLocation(skybox.SkyObject.Shader, "innerColor")
-    skybox.uOuter = rl.GetShaderLocation(skybox.SkyObject.Shader, "outerColor")
-    skybox.uEnvMap = rl.GetShaderLocation(skybox.SkyObject.Shader, "environmentMap")
-
+    PutCubemapOntoModel(skybox.Model, skybox.CubeMap, rl.MATERIAL_MAP_CUBEMAP)
+    
     skybox._loaded = true
 end
 
--- Unload skybox resources
 function skybox.Unload()
-    if not skybox._loaded then return end
-
-    rl.UnloadMesh(skybox.SkyObject.Mesh)
-    rl.UnloadShader(skybox.SkyObject.Shader)
-    rl.UnloadTexture(skybox.SkyObject.Cubemap)
-
-    skybox.SkyObject = {}
+    assert(skybox._loaded, "attempted to unload skybox after already unloading it")
     skybox._loaded = false
+
+    rl.UnloadMesh(skybox.Mesh)
+    skybox.Mesh = nil
+
+    rl.UnloadModel(skybox.Model)
+    skybox.Model = nil
+
+    rl.UnloadImage(skybox.Image)
+    skybox.Image = nil
+
+    rl.UnloadTexture(skybox.CubeMap)
+    skybox.CubeMap = nil
 end
 
--- Render skybox
-function skybox.Render()
-    assert(skybox._loaded, "Attempted to render skybox before loading")
+function skybox.Draw()
+    assert(skybox._loaded, "attempted to draw skybox before loading skybox")
 
-    local shader = skybox.SkyObject.Shader
-    local mesh = skybox.SkyObject.Mesh
-    local cubemap = skybox.SkyObject.Cubemap
+    --rl.rlDisableDepthTest()
+    --rl.rlDisableDepthMask()
+    --rl.rlDisableBackfaceCulling()
 
-    -- Inner and outer colors
-    local inner = rl.Color:new({0.25, 0.55, 0.65})
-    local outer = rl.Color:new({0.05, 0.15, 0.45})
+    rl.DrawModel(skybox.Model, vector.zero, 100, rl.WHITE)
 
-    rl.rlDisableDepthTest()
-    rl.rlDisableDepthMask()
-    rl.rlDisableBackfaceCulling()
-
-    -- Begin shader mode
-    rl.BeginShaderMode(shader)
-
-    -- Set uniforms
-    rl.SetShaderValue(shader, skybox.uInner, inner, rl.SHADER_UNIFORM_VEC3)
-    rl.SetShaderValue(shader, skybox.uOuter, outer, rl.SHADER_UNIFORM_VEC3)
-    rl.SetShaderValueTexture(shader, skybox.uEnvMap, cubemap)
-
-    -- Draw cube
-    rl.DrawMesh(mesh, rl.MatrixIdentity())
-
-    rl.EndShaderMode()
-
-    rl.rlEnableBackfaceCulling()
-    rl.rlEnableDepthMask()
-    rl.rlEnableDepthTest()
+    --rl.rlEnableBackfaceCulling()
+    --rl.rlEnableDepthMask()
+    --rl.rlEnableDepthTest()
 end
 
 return skybox
