@@ -6,29 +6,31 @@ local mem = zune.mem
 local skybox = {}
 skybox._loaded = false
 
-local function PutCubemapOntoModel(model, texture)
-    local materials = ffi.ptrFromAddress(mem.slice(model, rl.Model:offset("materials"), 8))
-    local maps = materials:readptr(rl.Material:offset("maps"))
-
-    maps:write(rl.MATERIAL_MAP_CUBEMAP * rl.TextureCubemap:size(), texture, 0, rl.TextureCubemap:size())
+local function loadMaterialOnModel(model, texture, const)
+	local materials = ffi.ptrFromAddress(mem.slice(model, rl.Model:offset("materials"), 8))
+	local maps = materials:readptr(rl.Material:offset("maps"))
+	maps:write(const or 0, texture, 0, rl.TextureCubemap:size())
 end
 
-function skybox.Load()
+function skybox.Load(getMeshMethod)
     assert(not skybox._loaded, "attempted to load skybox after already loading it")
+    print("Loading skybox...")
 
     skybox.Mesh = rl.GenMeshCube(1, 1, 1)
     skybox.Model = rl.LoadModelFromMesh(skybox.Mesh)
     skybox.Image = rl.LoadImage("./src/assets/sky/sky_default.png")
-    skybox.CubeMap = rl.LoadTextureCubemap(skybox.Image, rl.CUBEMAP_LAYOUT_CROSS_FOUR_BY_THREE)
+    skybox.CubeMap = rl.LoadTextureCubemap(skybox.Image, rl.CUBEMAP_LAYOUT_AUTO_DETECT)
 
-    PutCubemapOntoModel(skybox.Model, skybox.CubeMap)
-    
+    loadMaterialOnModel(skybox.Model, skybox.CubeMap, rl.MATERIAL_MAP_CUBEMAP)
+
     skybox._loaded = true
+    print("Loaded skybox!")
 end
 
 function skybox.Unload()
     assert(skybox._loaded, "attempted to unload skybox after already unloading it")
     print("Unloading skybox...")
+
     skybox._loaded = false
 
     skybox.Mesh = nil
@@ -39,18 +41,16 @@ function skybox.Unload()
     print("Unloaded skybox!")
 end
 
-function skybox.Draw()
+function skybox.Draw(position)
     assert(skybox._loaded, "attempted to draw skybox before loading skybox")
 
-    rl.rlDisableDepthTest()
-    rl.rlDisableDepthMask()
     rl.rlDisableBackfaceCulling()
+    rl.rlDisableDepthMask()
 
-    rl.DrawModel(skybox.Model, vector.zero, 100, rl.WHITE)
+    rl.DrawModel(skybox.Model, position, 1, rl.WHITE)
 
     rl.rlEnableBackfaceCulling()
     rl.rlEnableDepthMask()
-    rl.rlEnableDepthTest()
 end
 
 return skybox
