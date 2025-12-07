@@ -3,6 +3,7 @@ local renderer = require("@renderer")
 local filesystem = require("./modules/filesystem")
 local sandboxer = require("./modules/sandboxer")
 local engine_env = require("./environment/get")
+local UserInputService = require("./environment/game/services/UserInputService")
 
 local task = zune.task
 
@@ -36,11 +37,12 @@ execute("./src/sandboxed/test.luau", "file")
 rl.SetConfigFlags(rl.FLAG_WINDOW_RESIZABLE)
 rl.InitWindow(1200, 800, "Luanos Engine")
 rl.SetTargetFPS(360)
-rl.rlSetClipPlanes(0.01, 32768)
+--rl.rlSetClipPlanes(0.01, 32768)
 
 local lastWindowIsFocused = rl.IsWindowFocused()
 
 renderer.OnStart()
+
 while rl.WindowShouldClose() == 0 do
 	local windowIsFocused = rl.IsWindowFocused()
 	if lastWindowIsFocused ~= windowIsFocused then
@@ -50,7 +52,7 @@ while rl.WindowShouldClose() == 0 do
 			rl.SetTargetFPS(10)
 		end
 	end
-
+	UserInputService.Step()
     renderer.RenderScene()
 	lastWindowIsFocused = windowIsFocused
 end

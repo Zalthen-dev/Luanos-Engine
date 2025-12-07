@@ -81,6 +81,7 @@ export type Fns = {
 	MaximizeWindow: () -> (),
 	MinimizeWindow: () -> (),
 	RestoreWindow: () -> (),
+	rlSetClipPlanes: (near: float, far: float) -> (),
 	SetWindowIcon: (image: Image) -> (),
 	SetWindowIcons: (images: FFIPointer, count: int) -> (),
 	SetWindowTitle: (title: cstring) -> (),
@@ -137,6 +138,7 @@ export type Fns = {
 	EndVrStereoMode: () -> (),
 	LoadVrStereoConfig: (device: VrDeviceInfo) -> VrStereoConfig,
 	UnloadVrStereoConfig: (config: VrStereoConfig) -> (),
+	LoadImage: (fileName: cstring) -> Image,
 	LoadShader: (vsFileName: cstring, fsFileName: cstring) -> Shader,
 	LoadShaderFromMemory: (vsCode: cstring, fsCode: cstring) -> Shader,
 	IsShaderValid: (shader: Shader) -> bool,
@@ -147,6 +149,7 @@ export type Fns = {
 	SetShaderValueMatrix: (shader: Shader, locIndex: int, mat: Matrix) -> (),
 	SetShaderValueTexture: (shader: Shader, locIndex: int, texture: Texture) -> (),
 	UnloadShader: (shader: Shader) -> (),
+	UnloadImage: (image: Image) -> (),
 	GetScreenToWorldRay: (position: Vector2, camera: Camera3D) -> Ray,
 	GetScreenToWorldRayEx: (position: Vector2, camera: Camera3D, width: int, height: int) -> Ray,
 	GetWorldToScreen: (position: Vector3, camera: Camera3D) -> Vector2,
@@ -291,6 +294,8 @@ return {
 		MinimizeWindow = fn(void, {}),
 		-- void RestoreWindow(void);
 		RestoreWindow = fn(void, {}),
+		-- void rlSetClipPlanes(float near, float far);
+		rlSetClipPlanes = fn(void, { float, float }),
 		-- void SetWindowIcon(Image image);
 		SetWindowIcon = fn(void, { Image }),
 		-- void SetWindowIcons(Image *images, int count);
@@ -407,6 +412,8 @@ return {
 		-- void UnloadVrStereoConfig(VrStereoConfig config);
 		UnloadVrStereoConfig = fn(void, { VrStereoConfig }),
 
+		-- Image LoadImage(const char *fileName);
+		LoadImage = fn(Image, { cstring }),
 		-- Shader LoadShader(const char *vsFileName, const char *fsFileName);
 		LoadShader = fn(Shader, { cstring, cstring }),
 		-- Shader LoadShaderFromMemory(const char *vsCode, const char *fsCode);
@@ -427,6 +434,8 @@ return {
 		SetShaderValueTexture = fn(void, { Shader, int, Texture }),
 		-- void UnloadShader(Shader shader);
 		UnloadShader = fn(void, { Shader }),
+		-- void UnloadImage(Image image);
+		UnloadImage = fn(void, { Image }),
 
 		-- Ray GetScreenToWorldRay(Vector2 position, Camera camera);
 		GetScreenToWorldRay = fn(Ray, { Vector2, Camera3D }),
