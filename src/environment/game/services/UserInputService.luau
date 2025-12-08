@@ -28,33 +28,29 @@ local KEYCODE_LOOKUP:{string} = {}
 
 local GAMEPAD_MAP = {
     [0] = Enum.KeyCode.Unknown,
-    [1] = Enum.KeyCode.GAMEPAD_UP,
-    [2] = Enum.KeyCode.GAMEPAD_RIGHT,
-    [3] = Enum.KeyCode.GAMEPAD_DOWN,
-    [4] = Enum.KeyCode.GAMEPAD_LEFT,
-    [5] = Enum.KeyCode.GAMEPAD_Y,
-    [6] = Enum.KeyCode.GAMEPAD_B,
-    [7] = Enum.KeyCode.GAMEPAD_A,
-    [8] = Enum.KeyCode.GAMEPAD_X,
-    [9] = Enum.KeyCode.GAMEPAD_L1,
-    [10] = Enum.KeyCode.GAMEPAD_L2,
-    [11] = Enum.KeyCode.GAMEPAD_R1,
-    [12] = Enum.KeyCode.GAMEPAD_R2,
-    [13] = Enum.KeyCode.GAMEPAD_SELECT,
-    [14] = Enum.KeyCode.GAMEPAD_MODE,
-    [15] = Enum.KeyCode.GAMEPAD_START,
-    [16] = Enum.KeyCode.GAMEPAD_L3,
-    [17] = Enum.KeyCode.GAMEPAD_R3,
+    [1] = Enum.KeyCode.DPadUp,
+    [2] = Enum.KeyCode.DPadRight,
+    [3] = Enum.KeyCode.DPadDown,
+    [4] = Enum.KeyCode.DPadLeft,
+    [5] = Enum.KeyCode.ButtonY,
+    [6] = Enum.KeyCode.ButtonB,
+    [7] = Enum.KeyCode.ButtonA,
+    [8] = Enum.KeyCode.ButtonX,
+    [9] = Enum.KeyCode.ButtonL1,
+    [10] = Enum.KeyCode.ButtonL2,
+    [11] = Enum.KeyCode.ButtonR1,
+    [12] = Enum.KeyCode.ButtonR2,
+    [13] = Enum.KeyCode.ButtonSelect,
+    [14] = Enum.KeyCode.Mode,
+    [15] = Enum.KeyCode.ButtonStart,
+    [16] = Enum.KeyCode.ButtonL3,
+    [17] = Enum.KeyCode.ButtonR3,
 }
 
 local MOUSE_BUTTONS = {
-    Enum.KeyCode.MOUSE_LEFT,
-    Enum.KeyCode.MOUSE_RIGHT,
-    Enum.KeyCode.MOUSE_MIDDLE,
-    Enum.KeyCode.MOUSE_FORWARD,
-    Enum.KeyCode.MOUSE_BACK,
-    Enum.KeyCode.MOUSE_SIDE,
-    Enum.KeyCode.MOUSE_EXTRA,
+    Enum.KeyCode.MouseLeftButton,
+    Enum.KeyCode.MouseRightButton,
+    Enum.KeyCode.MouseMiddleButton,
 }
 
 for i,keyCode in pairs(Enum.KeyCode) do
@@ -195,11 +191,11 @@ function UserInputService.Step()
         
         if rl.IsMouseButtonPressed(btn) == 1 and not activeMouseButtons[btn] then
             local inputType = Enum.UserInputType.Unknown
-            if btn == Enum.KeyCode.MOUSE_LEFT then 
+            if btn == Enum.KeyCode.MouseLeftButton then 
                 inputType = Enum.UserInputType.MouseButton1
-            elseif btn == Enum.KeyCode.MOUSE_RIGHT then 
+            elseif btn == Enum.KeyCode.MouseRightButton then 
                 inputType = Enum.UserInputType.MouseButton2
-            elseif btn == Enum.KeyCode.MOUSE_MIDDLE then 
+            elseif btn == Enum.KeyCode.MouseMiddleButton then 
                 inputType = Enum.UserInputType.MouseButton3
             end
             local inputObj = createInputObject(inputType, btn)
