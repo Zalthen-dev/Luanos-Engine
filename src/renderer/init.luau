@@ -1,21 +1,28 @@
 local Signal = require("@signal")
 local rl = require("@raylib")
+local imgui = require("@rimgui")
+local utils = require("@utils")
+
+local scripteditor = require("./gui/scripteditor")
+
 local Skybox = require("./renderer/skybox")
 local Mesh = require("./renderer/mesh")
 
+local ffi = zune.ffi
 local task = zune.task
 local mem = zune.mem
 
 local renderer = {}
 
-renderer.CAMERA_SPEED = 20
-renderer.MOUSE_SENSITIVITY = 0.5
+renderer.CAMERA_SPEED = 25
+renderer.MOUSE_SENSITIVITY = 0.008
 
 local worldUp = vector.create(0, 1, 0)
 
 renderer.MainSignal = Signal.new()
 renderer.RenderPool3D = {}
 renderer.RenderPool2D = {}
+renderer.RenderGUIs = {}
 
 local function DrawTextOutlined(text:string, posX:number, posY:number, fontSize:number, color: rl.Color, outlineSize:number, outlineColor:rl.Color)
     rl.DrawText(text, posX - outlineSize, posY - outlineSize, fontSize, outlineColor);
@@ -86,6 +93,7 @@ local camera_pitch = 0
 local camera_fovy = 70
 local camera_target = vector.create(0, 2, 0)
 local camera_rotatingCamera = false
+local camera_warpingThisFrame = false
 local mouse_anchorPos = vector.create(0, 0)
 
 local camera = rl.Camera3D:new({
@@ -95,6 +103,8 @@ local camera = rl.Camera3D:new({
     fovy = camera_fovy,
     projection = rl.CAMERA_PERSPECTIVE,
 })
+
+local camera2d = rl.Camera2D:new({vector.zero, vector.zero, 0, 1})
 
 local function EulerToAxisAngleRad(euler: Vector3): (vector, number)
 	local cx, sx = math.cos(euler.X / 2), math.sin(euler.X / 2)
@@ -144,18 +154,25 @@ function renderer.UpdateFreecam(camera: rl.Camera3D, delta: number)
     if rl.IsMouseButtonPressed(rl.MOUSE_BUTTON_RIGHT) == 1 then
         mouse_anchorPos = rl.GetMousePosition()
         camera_rotatingCamera = true
+        camera_warpingThisFrame = true
     end
 
     if rl.IsMouseButtonReleased(rl.MOUSE_BUTTON_RIGHT) == 1 then
         camera_rotatingCamera = false
+        camera_warpingThisFrame = false
     end
 
     if camera_rotatingCamera then
-        local limit = (math.pi/2)-0.01
+        if camera_warpingThisFrame then
+            local limit = (math.pi/2)-0.01
 
-        camera_yaw += mouseDelta.x * 0.00832 * renderer.MOUSE_SENSITIVITY
-        camera_pitch = math.clamp(camera_pitch - mouseDelta.y * 0.008 * renderer.MOUSE_SENSITIVITY, -limit, limit)
-        rl.SetMousePosition(mouse_anchorPos.x, mouse_anchorPos.y)
+            camera_yaw += mouseDelta.x * renderer.MOUSE_SENSITIVITY
+            camera_pitch = math.clamp(camera_pitch - mouseDelta.y * renderer.MOUSE_SENSITIVITY, -limit, limit)
+        else
+            --rl.SetMousePosition(mouse_anchorPos.x, mouse_anchorPos.y)
+        end
+
+        camera_warpingThisFrame = not camera_warpingThisFrame
     end
 
     local forward = vector.create(
@@ -167,13 +184,15 @@ function renderer.UpdateFreecam(camera: rl.Camera3D, delta: number)
     local right = vector.normalize(vector.cross(worldUp, forward))
     local up = vector.normalize(vector.cross(forward, right))
 
-    local inputForward = rl.IsKeyDown(rl.KEY_W) - rl.IsKeyDown(rl.KEY_S)
-    local inputSideway = rl.IsKeyDown(rl.KEY_A) - rl.IsKeyDown(rl.KEY_D)
-    local inputUpward = (math.max(rl.IsKeyDown(rl.KEY_SPACE),rl.IsKeyDown(rl.KEY_E))) - rl.IsKeyDown(rl.KEY_Q)
+    if imgui.IsAnyItemFocused() == 0 then
+        local inputForward = rl.IsKeyDown(rl.KEY_W) - rl.IsKeyDown(rl.KEY_S)
+        local inputSideway = rl.IsKeyDown(rl.KEY_A) - rl.IsKeyDown(rl.KEY_D)
+        local inputUpward = (rl.IsKeyDown(rl.KEY_SPACE) or rl.IsKeyDown(rl.KEY_E)) - rl.IsKeyDown(rl.KEY_Q)
 
-    camera_position += forward * (inputForward * moveSpeed)
-    camera_position += right * (inputSideway * moveSpeed)
-    camera_position += up * (inputUpward * moveSpeed)
+        camera_position += forward * (inputForward * moveSpeed)
+        camera_position += right * (inputSideway * moveSpeed)
+        camera_position += up * (inputUpward * moveSpeed) 
+    end
 
     camera_target = camera_position + forward
     mem.writeVector3(camera, 0, camera_position)
@@ -207,17 +226,25 @@ local function DrawPart(part)
     renderer.MainSignal:Fire("Rendered", part)
 end
 
-function renderer.AddToRenderPool(data)
+function renderer.AddToRenderPool3D(data)
     table.insert(renderer.RenderPool3D, data)
     renderer.MainSignal:Fire("AddedObjectToRenderPool3D", data())
 end
 
+function renderer.AddToRenderPool2D(data)
+    table.insert(renderer.RenderPool2D, data)
+    renderer.MainSignal:Fire("AddedObjectToRenderPool2D", data())
+end
+
 function renderer.OnStart()
+    imgui.rImGuiSetup()
+    imgui.rImGuiDisableIO()
     Mesh.Load()
     --Skybox.Load()
 end
 
 function renderer.OnEnd()
+    imgui.rImGuiShutdown()
     Mesh.Unload()
     --Skybox.Unload()
 end
@@ -227,6 +254,7 @@ function renderer.RenderScene()
     local delta = rl.GetFrameTime()
 
     renderer.MainSignal:Fire("PreRender", delta)
+
     do rl.BeginDrawing()
         rl.ClearBackground(rl.BLUE)
 
@@ -254,15 +282,36 @@ function renderer.RenderScene()
 
         end; rl.EndMode3D()
 
-        DrawTextOutlined(tostring(rl.GetFPS()) .. " FPS", 10, 10, 20, rl.GREEN, 2, rl.BLACK)
-        DrawTextOutlined(tostring(task.count()) .. " tasks", 10, 30, 20, rl.WHITE, 2, rl.BLACK)
-        DrawTextOutlined(tostring(#renderer.RenderPool3D) .. " render pool", 10, 50, 20, rl.WHITE, 2, rl.BLACK)
-        DrawTextOutlined(tostring(actuallyDrawn3d) .. " drawn parts", 10, 70, 20, rl.WHITE, 2, rl.BLACK)
+        DrawTextOutlined(tostring(rl.GetFPS()) .. " FPS", 10, 30, 20, rl.GREEN, 2, rl.BLACK)
+        DrawTextOutlined(tostring(task.count()) .. " tasks", 10, 50, 20, rl.WHITE, 2, rl.BLACK)
+        DrawTextOutlined(tostring(#renderer.RenderPool3D) .. " render pool 3D", 10, 70, 20, rl.WHITE, 2, rl.BLACK)
+        DrawTextOutlined(tostring(#renderer.RenderPool2D) .. " render pool 2D", 10, 90, 20, rl.WHITE, 2, rl.BLACK)
+        DrawTextOutlined(tostring(actuallyDrawn3d) .. " drawn parts", 10, 110, 20, rl.WHITE, 2, rl.BLACK)
 
+        imgui.rImGuiBegin()
+        --scripteditor:Draw()
+
+        if imgui.BeginMainMenuBar() == 1 then
+            if imgui.BeginMenu("File") == 1 then
+                imgui.MenuItem("New", "Ctrl+N")
+                imgui.MenuItem("Save", "Ctrl+S")
+                imgui.MenuItem("Save as", "Shift+Ctrl+N")
+                imgui.MenuItem("Quit", "Alt+F4")
+
+                imgui.EndMenu()
+            end
+
+            if imgui.BeginMenu("Open") == 1 then
+                imgui.EndMenu()
+            end
+
+            imgui.EndMainMenuBar()
+        end
+        
+        imgui.rImGuiEnd()
     end; rl.EndDrawing()
 
     renderer.MainSignal:Fire("Heartbeat", delta)
-    task.wait()
 end
 
 return renderer
