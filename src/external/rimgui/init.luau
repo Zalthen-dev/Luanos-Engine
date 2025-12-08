@@ -9,6 +9,7 @@ local cstring = ffi.types.pointer
 local pointer_bool = ffi.types.pointer
 local pointer = ffi.types.pointer
 local long = ffi.types.i64
+local u16 = ffi.types.u16
 
 type int = number
 type uint = number
@@ -16,6 +17,7 @@ type bool = number
 type float = number
 type long = buffer
 type double = number
+type uint16 = number
 type cstring = string | buffer | FFIPointer;
 
 local ImVec2 = ffi.struct({
@@ -40,8 +42,13 @@ local ImVec4 = ffi.struct({
 type ImVec4 = typeof(ImVec4:new({}))
 
 local ImGuiInputTextCallbackData = ffi.struct({
+    { Ctx            = pointer },
     { EventFlag      = int },          -- ImGuiInputTextFlags
     { Flags          = int },          -- ImGuiInputTextFlags
+    { UserData       = pointer },      -- void*
+
+    { EventChar      = u16 },
+    { EventKey       = int },
 
     { Buf            = pointer },      -- char*
     { BufTextLen     = int },          
@@ -51,13 +58,6 @@ local ImGuiInputTextCallbackData = ffi.struct({
     { CursorPos      = int },
     { SelectionStart = int },
     { SelectionEnd   = int },
-
-    { UserData       = pointer },      -- void*
-
-    { EventChar      = uint },       -- ImWchar
-    { EventKey       = int },          -- ImGuiKey
-
-    { State          = pointer },      -- ImGuiInputTextState*
 })
 type ImGuiInputTextCallbackData = typeof(ImGuiInputTextCallbackData:new({}))
 
