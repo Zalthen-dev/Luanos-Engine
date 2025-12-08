@@ -1,8 +1,12 @@
 {
     "aliases": {
         "raylib": "./src/external/raylib",
+        "rimgui": "./src/external/rimgui",
         "signal": "./src/external/signal",
         "renderer": "./src/renderer/init",
+        "utils": "./src/modules/utils",
+
+        "window": "./src/modules/window",
         
         "registry": "./src/environment/class/Registry",
 
@@ -16,6 +20,7 @@
         "Ray": "./src/environment/datatypes/Ray",
         "UDim": "./src/environment/datatypes/UDim",
         "UDim2": "./src/environment/datatypes/UDim2",
-        "Vector3": "./src/environment/datatypes/Vector3"
+        "Vector3": "./src/environment/datatypes/Vector3",
+        "Enum": "./src/environment/datatypes/Enum"
     }
 }
