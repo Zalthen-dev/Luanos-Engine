@@ -58,7 +58,7 @@ self = window.Create("Script Editor", function()
             imgui.InputTextMultiline(
                 "##ScriptEditorTextbox",
                 currentTab.TextBuffer,
-                currentTab.TextBuffer:size() + 1,
+                currentTab.TextBuffer:size() + 2,
                 imgui.GetContentRegionAvail(),
                 bit32.bor(imgui.IMGUI_INPUTTEXTFLAGS_ALLOW_TAB_INPUT, imgui.IMGUI_INPUTTEXTFLAGS_CALLBACK_RESIZE),
                 self.TextCallback,
@@ -101,22 +101,29 @@ self.TextCallback = ffi.closure({
     returns = ffi.types.i32
 }, function(data)
 
-    local eventFlag  = buffer.readi32(data, 0)
-    if bit32.band(eventFlag, imgui.IMGUI_INPUTTEXTFLAGS_CALLBACK_RESIZE) == imgui.IMGUI_INPUTTEXTFLAGS_CALLBACK_RESIZE then
+    local eventFlag = buffer.readi32(data, imgui.ImGuiInputTextCallbackData:offset("EventFlag"))
+    print(eventFlag)
+    print(imgui.IMGUI_INPUTTEXTFLAGS_CALLBACK_RESIZE)
+    print(bit32.band(eventFlag, imgui.IMGUI_INPUTTEXTFLAGS_CALLBACK_RESIZE))
+    if bit32.band(eventFlag, imgui.IMGUI_INPUTTEXTFLAGS_CALLBACK_RESIZE) <= imgui.IMGUI_INPUTTEXTFLAGS_CALLBACK_RESIZE then
         local tab = self:GetCurrentTab()
         if not tab then return 0 end
 
-        print(buffer.tostring(data))
+        local ptr = ffi.ptrFromAddress(data)
 
-        local buf = ffi.ptrFromAddress(mem.slice(data, 8, 8))
-
+        local buf = ffi.ptrFromAddress(mem.slice(data, imgui.ImGuiInputTextCallbackData:offset("UserData"), 8))
         local text = buffer.tostring(mem.slice(buf, 0))
         print(text)
 
-        local newBuf = ffi.alloc(text:len() + 2)
+        local newBuf = ffi.alloc(tab.TextBuffer:size() + 2)
         mem.copy(newBuf, 0, tab.TextBuffer, 0)
         
         tab.TextBuffer = newBuf
+
+        mem.copy(data, imgui.ImGuiInputTextCallbackData:offset("Buf"), newBuf, 0)
+        buffer.writei32(data, imgui.ImGuiInputTextCallbackData:offset("BufTextLen"), newBuf:size())
+        buffer.writei32(data, imgui.ImGuiInputTextCallbackData:offset("BufSize"), newBuf:size())
+        buffer.writeu8(data, imgui.ImGuiInputTextCallbackData:offset("BufDirty"), 1)
     end
 
     return 0
