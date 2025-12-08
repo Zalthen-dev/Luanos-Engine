@@ -7,6 +7,8 @@
 # Dependencies
 1. [Zune](https://github.com/Scythe-Technology/zune)
 2. [Raylib](https://github.com/raysan5/raylib)
+3. [ImGui](https://github.com/ocornut/imgui)
+4. [rlImGui](https://github.com/raylib-extras/rlImGui)
 
 # Running Luanos Engine
 ### Linux
@@ -19,7 +21,22 @@ git clone https://github.com/Zalthen-dev/Luanos-Engine.git
 cd Luanos-Engine
 ```
 
-3. Run
+3. Navigate to `src/external/rimgui/src`
+
+4. Clone [imgui](https://github.com/ocornut/imgui) and [rlImGui](https://github.com/raylib-extras/rlImGui)
+```bash
+git clone https://github.com/ocornut/imgui.git
+git clone https://github.com/raylib-extras/rlImGui.git
+```
+
+5. Compile to shared library
+```bash
+g++ -shared -fPIC wrapper.cpp rlImGui/rlImGui.cpp imgui/imgui.cpp imgui/imgui_draw.cpp imgui/imgui_widgets.cpp imgui/imgui_tables.cpp imgui/imgui_demo.cpp -I. -Iimgui -IrlImGui -Iraylib/src -lraylib -o librimgui.so
+```
+
+6. Drag `librimgui.so` into `src/external/rimgui/bin`
+
+7. Run
 ```bash
 zune run game
 ```
