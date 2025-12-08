@@ -1,6 +1,5 @@
 local Signal = require("@signal")
 local rl = require("@raylib")
-
 local Skybox = require("./renderer/skybox")
 local Mesh = require("./renderer/mesh")
 
@@ -9,8 +8,8 @@ local mem = zune.mem
 
 local renderer = {}
 
-renderer.CAMERA_SPEED = 500
-renderer.MOUSE_SENSITIVITY = 0.008
+renderer.CAMERA_SPEED = 20
+renderer.MOUSE_SENSITIVITY = 0.5
 
 local worldUp = vector.create(0, 1, 0)
 
@@ -87,7 +86,6 @@ local camera_pitch = 0
 local camera_fovy = 70
 local camera_target = vector.create(0, 2, 0)
 local camera_rotatingCamera = false
-local camera_warpingThisFrame = false
 local mouse_anchorPos = vector.create(0, 0)
 
 local camera = rl.Camera3D:new({
@@ -146,25 +144,18 @@ function renderer.UpdateFreecam(camera: rl.Camera3D, delta: number)
     if rl.IsMouseButtonPressed(rl.MOUSE_BUTTON_RIGHT) == 1 then
         mouse_anchorPos = rl.GetMousePosition()
         camera_rotatingCamera = true
-        camera_warpingThisFrame = true
     end
 
     if rl.IsMouseButtonReleased(rl.MOUSE_BUTTON_RIGHT) == 1 then
         camera_rotatingCamera = false
-        camera_warpingThisFrame = false
     end
 
     if camera_rotatingCamera then
-        if camera_warpingThisFrame then
-            local limit = (math.pi/2)-0.01
+        local limit = (math.pi/2)-0.01
 
-            camera_yaw += mouseDelta.x * renderer.MOUSE_SENSITIVITY
-            camera_pitch = math.clamp(camera_pitch - mouseDelta.y * renderer.MOUSE_SENSITIVITY, -limit, limit)
-        else
-            --rl.SetMousePosition(mouse_anchorPos.x, mouse_anchorPos.y)
-        end
-
-        camera_warpingThisFrame = not camera_warpingThisFrame
+        camera_yaw += mouseDelta.x * 0.00832 * renderer.MOUSE_SENSITIVITY
+        camera_pitch = math.clamp(camera_pitch - mouseDelta.y * 0.008 * renderer.MOUSE_SENSITIVITY, -limit, limit)
+        rl.SetMousePosition(mouse_anchorPos.x, mouse_anchorPos.y)
     end
 
     local forward = vector.create(
@@ -178,7 +169,7 @@ function renderer.UpdateFreecam(camera: rl.Camera3D, delta: number)
 
     local inputForward = rl.IsKeyDown(rl.KEY_W) - rl.IsKeyDown(rl.KEY_S)
     local inputSideway = rl.IsKeyDown(rl.KEY_A) - rl.IsKeyDown(rl.KEY_D)
-    local inputUpward = (rl.IsKeyDown(rl.KEY_SPACE) or rl.IsKeyDown(rl.KEY_E)) - rl.IsKeyDown(rl.KEY_Q)
+    local inputUpward = (math.max(rl.IsKeyDown(rl.KEY_SPACE),rl.IsKeyDown(rl.KEY_E))) - rl.IsKeyDown(rl.KEY_Q)
 
     camera_position += forward * (inputForward * moveSpeed)
     camera_position += right * (inputSideway * moveSpeed)
