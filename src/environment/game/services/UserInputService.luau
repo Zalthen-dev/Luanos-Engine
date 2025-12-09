@@ -23,8 +23,8 @@ export type InputObject = {
     UserInputState: Vector2?,
 }
 
-local INPUT_TYPE_LOOKUP:{[Enum.UserInputType]:string} = {}
-local KEYCODE_LOOKUP:{[Enum.KeyCode]:string} = {}
+local INPUT_TYPE_LOOKUP:{string} = {}
+local KEYCODE_LOOKUP:{string} = {}
 
 local GAMEPAD_MAP = {
     [0] = Enum.KeyCode.Unknown,
@@ -141,13 +141,13 @@ function UserInputService.Step()
             -- l2/r2 triggers and thumbsticks
             local L2axisInput = (rl.GetGamepadAxisMovement(id, rl.GAMEPAD_AXIS_LEFT_TRIGGER)+1)/2
             if L2axisInput ~= Gamepads[id].Axis[rl.GAMEPAD_AXIS_LEFT_TRIGGER] then
-                local inputObj = createInputObject(gamepadEnum, Enum.KeyCode.ButtonL2, Vector2.new(0, L2axisInput))
+                local inputObj = createInputObject(gamepadEnum, Enum.KeyCode.GAMEPAD_L2, Vector2.new(0, L2axisInput))
                 UserInputService.InputChanged:Fire(inputObj, false)
                 Gamepads[id].Axis[rl.GAMEPAD_AXIS_LEFT_TRIGGER] = L2axisInput
             end
             local R2axisInput = (rl.GetGamepadAxisMovement(id, rl.GAMEPAD_AXIS_RIGHT_TRIGGER)+1)/2
             if R2axisInput ~= Gamepads[id].Axis[rl.GAMEPAD_AXIS_RIGHT_TRIGGER] then
-                local inputObj = createInputObject(gamepadEnum, Enum.KeyCode.ButtonR2, Vector2.new(0, R2axisInput))
+                local inputObj = createInputObject(gamepadEnum, Enum.KeyCode.GAMEPAD_R2, Vector2.new(0, R2axisInput))
                 UserInputService.InputChanged:Fire(inputObj, false)
                 Gamepads[id].Axis[rl.GAMEPAD_AXIS_RIGHT_TRIGGER] = R2axisInput
             end
