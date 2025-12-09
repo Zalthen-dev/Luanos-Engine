@@ -1,5 +1,5 @@
-local platform = zune.platform;
 local ffi = zune.ffi
+
 local void = ffi.types.void
 local int = ffi.types.i32
 local uint = ffi.types.u32
@@ -166,21 +166,7 @@ local defs = {
     IsAnyItemFocused = fn(bool, {}),
 }
 
-local libLocation = "./src/external/rimgui/bin/librimgui.so"
-
-if platform.cpu.arch == "x86_64" then
-    if platform.os == "windows" then
-        libLocation = "./src/external/rimgui/bin/librimgui.dll"
-    elseif platform.os == "linux" then
-        libLocation = "./src/external/rimgui/bin/librimgui.so"
-    else
-        -- other platforms
-    end
-else
-    -- other archs
-end
-
-local lib = ffi.dlopen(libLocation, defs) :: {
+local lib = ffi.dlopen("./src/external/rimgui/bin/librimgui.so", defs) :: {
     GetSymbol: (self: FFILibrary, symbol: string) -> FFIPointer?,
 } & Fns
 
