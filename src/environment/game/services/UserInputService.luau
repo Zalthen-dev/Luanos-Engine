@@ -3,6 +3,7 @@ local Enum = require("../../datatypes/Enum")
 local Instance = require("@Instance")
 local Signal = require("@signal")
 local rl = require("@raylib")
+local raykey = require("../../../external/raykeys")
 
 local UserInputService = Instance.new("UserInputService")
 
@@ -68,6 +69,7 @@ local function createInputObject(inputType, keyCode, state):{UserInputType: numb
     }
 end
 
+
 function UserInputService.GetConnectedGamepads():{Enum.UserInputType}
     local connectedEnums = {}
     for id = 0, 3 do
@@ -76,6 +78,21 @@ function UserInputService.GetConnectedGamepads():{Enum.UserInputType}
         end
     end
     return connectedEnums
+end
+
+function UserInputService.IsKeyDown(keyCode: Enum.KeyCode): boolean
+    if activeKeys[raykey.KeyCode[keyCode]] then
+        return true
+    end
+    return false
+end
+
+function UserInputService.EnumToRaylib(KeyCode: Enum.KeyCode)
+    return raykey.KeyCode[KeyCode] or 0
+end
+
+function UserInputService.RaylibToEnum(raylibKeyCode: number)
+    return raykey.ReverseKeyCode[raylibKeyCode] or 0
 end
 
 function UserInputService.GetStringForInputType(InputType: Enum.UserInputType): string
@@ -99,7 +116,7 @@ function UserInputService.Step()
     while true do
         local key = rl.GetKeyPressed()
         if key == 0 then break end
-        local inputObj = createInputObject(Enum.UserInputType.Keyboard, key)
+        local inputObj = createInputObject(Enum.UserInputType.Keyboard, raykey.ReverseKeyCode[key])
         activeKeys[key] = inputObj 
         UserInputService.InputBegan:Fire(inputObj, false)
         UserInputService.LastInputType = Enum.UserInputType.Keyboard
