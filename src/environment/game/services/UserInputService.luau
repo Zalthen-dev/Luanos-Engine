@@ -3,6 +3,7 @@ local Enum = require("../../datatypes/Enum")
 local Instance = require("@Instance")
 local Signal = require("@signal")
 local rl = require("@raylib")
+local raykey = require("../../../external/raykeys")
 
 local UserInputService = Instance.new("UserInputService")
 
@@ -23,8 +24,8 @@ export type InputObject = {
     UserInputState: Vector2?,
 }
 
-local INPUT_TYPE_LOOKUP:{string} = {}
-local KEYCODE_LOOKUP:{string} = {}
+local INPUT_TYPE_LOOKUP:{[Enum.UserInputType]:string} = {}
+local KEYCODE_LOOKUP:{[Enum.KeyCode]:string} = {}
 
 local GAMEPAD_MAP = {
     [0] = Enum.KeyCode.Unknown,
@@ -68,6 +69,7 @@ local function createInputObject(inputType, keyCode, state):{UserInputType: numb
     }
 end
 
+
 function UserInputService.GetConnectedGamepads():{Enum.UserInputType}
     local connectedEnums = {}
     for id = 0, 3 do
@@ -76,6 +78,21 @@ function UserInputService.GetConnectedGamepads():{Enum.UserInputType}
         end
     end
     return connectedEnums
+end
+
+function UserInputService.IsKeyDown(keyCode: Enum.KeyCode): boolean
+    if activeKeys[raykey.KeyCode[keyCode]] then
+        return true
+    end
+    return false
+end
+
+function UserInputService.EnumToRaylib(KeyCode: Enum.KeyCode)
+    return raykey.KeyCode[KeyCode] or 0
+end
+
+function UserInputService.RaylibToEnum(raylibKeyCode: number)
+    return raykey.ReverseKeyCode[raylibKeyCode] or 0
 end
 
 function UserInputService.GetStringForInputType(InputType: Enum.UserInputType): string
@@ -99,7 +116,7 @@ function UserInputService.Step()
     while true do
         local key = rl.GetKeyPressed()
         if key == 0 then break end
-        local inputObj = createInputObject(Enum.UserInputType.Keyboard, key)
+        local inputObj = createInputObject(Enum.UserInputType.Keyboard, raykey.ReverseKeyCode[key])
         activeKeys[key] = inputObj 
         UserInputService.InputBegan:Fire(inputObj, false)
         UserInputService.LastInputType = Enum.UserInputType.Keyboard
@@ -141,13 +158,13 @@ function UserInputService.Step()
             -- l2/r2 triggers and thumbsticks
             local L2axisInput = (rl.GetGamepadAxisMovement(id, rl.GAMEPAD_AXIS_LEFT_TRIGGER)+1)/2
             if L2axisInput ~= Gamepads[id].Axis[rl.GAMEPAD_AXIS_LEFT_TRIGGER] then
-                local inputObj = createInputObject(gamepadEnum, Enum.KeyCode.GAMEPAD_L2, Vector2.new(0, L2axisInput))
+                local inputObj = createInputObject(gamepadEnum, Enum.KeyCode.ButtonL2, Vector2.new(0, L2axisInput))
                 UserInputService.InputChanged:Fire(inputObj, false)
                 Gamepads[id].Axis[rl.GAMEPAD_AXIS_LEFT_TRIGGER] = L2axisInput
             end
             local R2axisInput = (rl.GetGamepadAxisMovement(id, rl.GAMEPAD_AXIS_RIGHT_TRIGGER)+1)/2
             if R2axisInput ~= Gamepads[id].Axis[rl.GAMEPAD_AXIS_RIGHT_TRIGGER] then
-                local inputObj = createInputObject(gamepadEnum, Enum.KeyCode.GAMEPAD_R2, Vector2.new(0, R2axisInput))
+                local inputObj = createInputObject(gamepadEnum, Enum.KeyCode.ButtonR2, Vector2.new(0, R2axisInput))
                 UserInputService.InputChanged:Fire(inputObj, false)
                 Gamepads[id].Axis[rl.GAMEPAD_AXIS_RIGHT_TRIGGER] = R2axisInput
             end
