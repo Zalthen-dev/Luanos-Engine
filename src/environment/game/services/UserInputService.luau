@@ -1,9 +1,11 @@
-local Vector2 = require("../../datatypes/Vector2")
-local Enum = require("../../datatypes/Enum")
+local rl = require("@raylib")
+local raykey = require("@raykeys")
+
 local Instance = require("@Instance")
 local Signal = require("@signal")
-local rl = require("@raylib")
-local raykey = require("../../../external/raykeys")
+
+local Vector2 = require("@Vector2")
+local Enum = require("@Enum")
 
 local UserInputService = Instance.new("UserInputService")
 
