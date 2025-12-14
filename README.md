@@ -31,7 +31,7 @@ git clone https://github.com/raylib-extras/rlImGui.git
 
 5. Compile to shared library
 ```bash
-g++ -shared -fPIC wrapper.cpp rlImGui/rlImGui.cpp imgui/imgui.cpp imgui/imgui_draw.cpp imgui/imgui_widgets.cpp imgui/imgui_tables.cpp imgui/imgui_demo.cpp -I. -Iimgui -IrlImGui -Iraylib/src -lraylib -o librimgui.so
+g++ -shared -fPIC wrapper.cpp rlImGui/rlImGui.cpp imgui/imgui.cpp imgui/imgui_draw.cpp imgui/imgui_widgets.cpp imgui/imgui_tables.cpp imgui/imgui_demo.cpp texteditor/texteditor.h texteditor/texteditor.cpp -I. -Iimgui -IrlImGui -Iraylib/src -lraylib -o librimgui.so
 ```
 
 6. Drag `librimgui.so` into `src/external/rimgui/bin`
