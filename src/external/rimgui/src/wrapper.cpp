@@ -1,19 +1,25 @@
 #include <raylib.h>
 #include <raymath.h>
+#include <string>
 
+#include "imgui/imgui_internal.h"
 #include "imgui/imgui.h"
 #include "rlImGui/rlImGui.h"
 
+#include "texteditor/texteditor.h"
+
 /*
+
 Compile with below line
 
-g++ -shared -fPIC     wrapper.cpp     rlImGui/rlImGui.cpp     imgui/imgui.cpp     imgui/imgui_draw.cpp     imgui/imgui_widgets.cpp     imgui/imgui_tables.cpp     imgui/imgui_demo.cpp     -I. -Iimgui -IrlImGui -Iraylib/src     -lraylib     -o librimgui.so
+g++ -shared -fPIC wrapper.cpp rlImGui/rlImGui.cpp imgui/imgui.cpp imgui/imgui_draw.cpp imgui/imgui_widgets.cpp imgui/imgui_tables.cpp imgui/imgui_demo.cpp texteditor/texteditor.h texteditor/texteditor.cpp -I. -Iimgui -IrlImGui -Iraylib/src -lraylib -o librimgui.so
+
 */
 
-extern "C"{
+extern "C" {
     struct ImVec2_FFI { float x, y; };
     struct ImVec3_FFI { float x, y, z; };
-    struct ImVec4_FFI { float x, y, z, w; };
+    struct ImVec4_FFI { float x, y, z, w; };    
 
     const int IMGUI_WINDOWFLAGS_NONE                   = 0;
     const int IMGUI_WINDOWFLAGS_NO_TITLE_BAR           = 1 << 0;
@@ -38,6 +44,9 @@ extern "C"{
     const int IMGUI_WINDOWFLAGS_MENU_MODE              = 1 << 21;
     const int IMGUI_WINDOWFLAGS_NO_NAV                 = IMGUI_WINDOWFLAGS_NO_NAV_INPUT | IMGUI_WINDOWFLAGS_NO_NAV_FOCUS;
 
+    const int IMGUI_TREENODEFLAGS_NONAVFOCUS = 1 << 27;
+    const int IMGUI_TREENODEFLAGS_CLIPLABELFORTRAILINGBUTTON = 1 << 28;
+    const int IMGUI_TREENODEFLAGS_UPSIDEDOWNARROW = 1 << 29;
 
     ImVec2_FFI cImVec2(float x, float y) {
         ImVec2_FFI v;
@@ -75,6 +84,10 @@ extern "C"{
     void rImGui_ShowDemoWindow() {
         ImGui::ShowDemoWindow();
     }
+    
+    int GetID(const char* str) {
+        return ImGui::GetID(str);
+    }
 
     void Begin(const char* text, bool *p_open, int window_flags = 0) {
         ImGui::Begin(text, p_open, window_flags);
@@ -89,7 +102,7 @@ extern "C"{
     }
 
     void TextColored(ImVec4_FFI color, const char* text) {
-        ImGui::TextColored(ImVec4(color.x, color.y, color.z, color.w), "%s", text);
+        ImGui::TextColored(ImVec4(color.x, color.y, color.z, color.w), text);
     }
 
     void TextUnformatted(const char* text) {
@@ -188,12 +201,22 @@ extern "C"{
         return ImGui::InputInt(label, v, step, step_fast, flags);
     }
 
+    int TextResizeCallback(ImGuiInputTextCallbackData* data) {
+        if (data->EventFlag == (1 << 18)) {
+            std::string* str = reinterpret_cast<std::string*>(data->UserData);
+            str->resize(data->BufTextLen + 1);
+            data->Buf = str->data();
+        }
+
+        return 0;
+    }
+
     bool InputText(const char* label, char* buf, int buf_size, int flags) {
         return ImGui::InputText(label, buf, buf_size, flags, 0, 0);
     }
 
-    bool InputTextMultiline(const char* label, char* buf, int buf_size, ImVec2_FFI size, int flags, ImGuiInputTextCallback callback, void* user_data) {
-        return ImGui::InputTextMultiline(label, buf, buf_size, ImVec2(size.x, size.y), flags | (1 << 18), callback, user_data);
+    bool InputTextMultiline(const char* label, char* buf, int buf_size, ImVec2_FFI size, int flags) {
+        return ImGui::InputTextMultiline(label, buf, buf_size, ImVec2(size.x, size.y), flags | (1 << 18), TextResizeCallback, buf);
     }
 
     bool InputTextWithHint(const char* label, const char* hint, char* buf, int buf_size, int flags) {
@@ -232,8 +255,28 @@ extern "C"{
         ImGui::EndMainMenuBar();
     }
 
+    bool TreeNode(const char* label) {
+        return ImGui::TreeNode(label);
+    }
+
+    bool TreeNodeEx(const char* label, int flags) {
+        return ImGui::TreeNodeEx(label, flags);
+    }
+
+    bool IsItemClicked() {
+        return ImGui::IsItemClicked();
+    }
+
+    void TreePop() {
+        ImGui::TreePop();
+    }
+
     void SetNextWindowSize(ImVec2_FFI size, int condition) {
         ImGui::SetNextWindowSize(ImVec2(size.x, size.y), condition);
+    }
+
+    void SetNextWindowPos(ImVec2_FFI size, int condition) {
+        ImGui::SetNextWindowPos(ImVec2(size.x, size.y), condition);
     }
 
     ImVec2_FFI GetWindowSize() {
@@ -261,5 +304,33 @@ extern "C"{
 
     bool IsAnyItemFocused() {
         return ImGui::IsAnyItemFocused();
+    }
+
+
+    
+
+    TextEditor* TextEditorCreate(int initialSize) {
+        size_t initial_capacity = initialSize;
+        return TextEditor_Create(initial_capacity);
+    }
+
+    void TextEditorDraw(TextEditor* textEditor, const char* label, ImVec2_FFI size, int flags) {
+        TextEditor_Draw(textEditor, label, ImVec2(size.x, size.y), flags);
+    }
+
+    int TextEditorGetLength(TextEditor* textEditor) {
+        return TextEditor_GetLength(textEditor);
+    }
+
+    const char* TextEditorGetText(TextEditor* textEditor) {
+        return TextEditor_GetText(textEditor);
+    }
+
+    void TextEditorSetText(TextEditor* textEditor, const char* text) {
+        TextEditor_SetText(textEditor, text);
+    }
+
+    void TextEditorDestroy(TextEditor* textEditor) {
+        TextEditor_Destroy(textEditor);
     }
 }
