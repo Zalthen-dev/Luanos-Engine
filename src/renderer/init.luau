@@ -3,8 +3,6 @@ local rl = require("@raylib")
 local imgui = require("@rimgui")
 local utils = require("@utils")
 
-local scripteditor = require("./gui/scripteditor")
-
 local Skybox = require("./renderer/skybox")
 local Mesh = require("./renderer/mesh")
 
@@ -19,10 +17,12 @@ renderer.MOUSE_SENSITIVITY = 0.008
 
 local worldUp = vector.create(0, 1, 0)
 
+local EngineState = nil
+
 renderer.MainSignal = Signal.new()
 renderer.RenderPool3D = {}
 renderer.RenderPool2D = {}
-renderer.RenderGUIs = {}
+renderer.RenderWindows = {}
 
 local function DrawTextOutlined(text:string, posX:number, posY:number, fontSize:number, color: rl.Color, outlineSize:number, outlineColor:rl.Color)
     rl.DrawText(text, posX - outlineSize, posY - outlineSize, fontSize, outlineColor);
@@ -236,7 +236,9 @@ function renderer.AddToRenderPool2D(data)
     renderer.MainSignal:Fire("AddedObjectToRenderPool2D", data())
 end
 
-function renderer.OnStart()
+function renderer.OnStart(engineState)
+    EngineState = engineState 
+
     imgui.rImGuiSetup()
     imgui.rImGuiDisableIO()
     Mesh.Load()
@@ -289,7 +291,10 @@ function renderer.RenderScene()
         DrawTextOutlined(tostring(actuallyDrawn3d) .. " drawn parts", 10, 110, 20, rl.WHITE, 2, rl.BLACK)
 
         imgui.rImGuiBegin()
-        --scripteditor:Draw()
+
+        for _, window in renderer.RenderWindows do
+            window:Draw(EngineState)
+        end
 
         if imgui.BeginMainMenuBar() == 1 then
             if imgui.BeginMenu("File") == 1 then
