@@ -1,19 +1,24 @@
 local imgui = require("@rimgui")
 local window = require("@window")
+local editor = require("@editor")
 
 local ffi = zune.ffi
 local mem = zune.mem
 
+local defaultText = [[print("Hello World")]]
+
 local self
 self = window.Create("Script Editor", function()
-    imgui.SetNextWindowSize(imgui.NewImVec2(500, 300), imgui.IMGUI_COND_ONCE)
+    imgui.SetNextWindowSize(imgui.NewImVec2(800, 600), imgui.IMGUI_COND_ONCE)
     if imgui.Begin(self.title, self.visible, imgui.IMGUI_WINDOWFLAGS_MENU_BAR) then
         local function Action_New()
-            self:AddTab("print('Hello World')")
+            self:AddTab(defaultText)
         end
 
         local function Action_Close()
-            if self:GetCurrentTab() then
+            local tab = self:GetCurrentTab()
+            if tab then
+                tab.Editor:destroy()
                 table.remove(self.Tabs, self.CurrentTabIndice)
 
                 if self.CurrentTabIndice > #self.Tabs and #self.Tabs > 0 then
@@ -55,15 +60,12 @@ self = window.Create("Script Editor", function()
 
         local currentTab = self:GetCurrentTab()
         if currentTab then
-            imgui.InputTextMultiline(
-                "##ScriptEditorTextbox",
-                currentTab.TextBuffer,
-                currentTab.TextBuffer:size() + 2,
-                imgui.GetContentRegionAvail(),
-                bit32.bor(imgui.IMGUI_INPUTTEXTFLAGS_ALLOW_TAB_INPUT, imgui.IMGUI_INPUTTEXTFLAGS_CALLBACK_RESIZE),
-                self.TextCallback,
-                currentTab.TextBuffer
-            )
+            local text = currentTab.Editor:getText()
+            local lineCount = currentTab.Editor:getLineCount()
+
+            imgui.Text(tostring(lineCount))
+
+            currentTab.Editor:draw("##ScriptEditorTextbox", imgui.GetContentRegionAvail(), imgui.IMGUI_INPUTTEXTFLAGS_ALLOW_TAB_INPUT)
         else
             local availRegion = imgui.FromImVec2(imgui.GetWindowSize())
             local text = "No scripts open"
@@ -83,9 +85,12 @@ end)
 self.Tabs = {}
 self.CurrentTabIndice = 1
 function self:AddTab(text)
+    local editorObj = editor.new()
+    editorObj:setText(text)
+
     table.insert(self.Tabs, {
         Name = "Script " .. tostring(math.random(1, 999)),
-        TextBuffer = ffi.dupe(buffer.fromstring(text)),
+        Editor = editorObj
     })
 end
 
@@ -94,39 +99,7 @@ function self:GetCurrentTab()
         self.CurrentTabIndice = math.clamp(self.CurrentTabIndice, 1, #self.Tabs)
         return self.Tabs[self.CurrentTabIndice]
     end
+    return
 end
-
-self.TextCallback = ffi.closure({
-    args = { imgui.ImGuiInputTextCallbackData },
-    returns = ffi.types.i32
-}, function(data)
-
-    local eventFlag = buffer.readi32(data, imgui.ImGuiInputTextCallbackData:offset("EventFlag"))
-    print(eventFlag)
-    print(imgui.IMGUI_INPUTTEXTFLAGS_CALLBACK_RESIZE)
-    print(bit32.band(eventFlag, imgui.IMGUI_INPUTTEXTFLAGS_CALLBACK_RESIZE))
-    if bit32.band(eventFlag, imgui.IMGUI_INPUTTEXTFLAGS_CALLBACK_RESIZE) <= imgui.IMGUI_INPUTTEXTFLAGS_CALLBACK_RESIZE then
-        local tab = self:GetCurrentTab()
-        if not tab then return 0 end
-
-        local ptr = ffi.ptrFromAddress(data)
-
-        local buf = ffi.ptrFromAddress(mem.slice(data, imgui.ImGuiInputTextCallbackData:offset("UserData"), 8))
-        local text = buffer.tostring(mem.slice(buf, 0))
-        print(text)
-
-        local newBuf = ffi.alloc(tab.TextBuffer:size() + 2)
-        mem.copy(newBuf, 0, tab.TextBuffer, 0)
-        
-        tab.TextBuffer = newBuf
-
-        mem.copy(data, imgui.ImGuiInputTextCallbackData:offset("Buf"), newBuf, 0)
-        buffer.writei32(data, imgui.ImGuiInputTextCallbackData:offset("BufTextLen"), newBuf:size())
-        buffer.writei32(data, imgui.ImGuiInputTextCallbackData:offset("BufSize"), newBuf:size())
-        buffer.writeu8(data, imgui.ImGuiInputTextCallbackData:offset("BufDirty"), 1)
-    end
-
-    return 0
-end)
 
 return self
