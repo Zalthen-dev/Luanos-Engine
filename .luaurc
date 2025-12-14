@@ -1,25 +1,28 @@
 {
     "aliases": {
         "raylib": "./src/external/raylib",
+        "raykeys": "./src/external/raykeys",
         "rimgui": "./src/external/rimgui",
         "signal": "./src/external/signal",
-        "renderer": "./src/renderer/init",
-        "utils": "./src/modules/utils",
-
-        "window": "./src/modules/window",
         
-        "registry": "./src/environment/class/Registry",
+        "renderer": "./src/renderer/init",
+
+        "utils": "./src/modules/utils",
+        "window": "./src/modules/window",
+        "editor": "./src/modules/editor",
 
         "assets": "./src/assets",
         
         "DataModel": "./src/environment/game",
-        "Instance": "./src/environment/class/Instance",
 
+        "registry": "./src/environment/class/Registry",
+        "Instance": "./src/environment/class/Instance",
         "CFrame": "./src/environment/datatypes/CFrame",
         "Color3": "./src/environment/datatypes/Color3",
         "Ray": "./src/environment/datatypes/Ray",
         "UDim": "./src/environment/datatypes/UDim",
         "UDim2": "./src/environment/datatypes/UDim2",
+        "Vector2": "./src/environment/datatypes/Vector2",
         "Vector3": "./src/environment/datatypes/Vector3",
         "Enum": "./src/environment/datatypes/Enum"
     }
