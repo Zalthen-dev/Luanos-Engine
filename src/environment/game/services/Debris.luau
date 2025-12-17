@@ -11,6 +11,8 @@ function Debris:AddItem(object, lifetime: number | nil)
     }
 end
 
+--
+
 Debris.InitRenderer = function(renderer)
     renderer.MainSignal:Connect(function(route, dt)
         if route ~= "PreRender" then return end
