@@ -8,6 +8,7 @@
         "renderer": "./src/renderer/init",
 
         "utils": "./src/modules/utils",
+        "rayutils": "./src/modules/rayutils",
         "window": "./src/modules/window",
         "editor": "./src/modules/editor",
 
