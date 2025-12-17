@@ -20,6 +20,7 @@
         "Instance": "./src/environment/class/Instance",
         "CFrame": "./src/environment/datatypes/CFrame",
         "Color3": "./src/environment/datatypes/Color3",
+        "BrickColor": "./src/environment/datatypes/BrickColor/init",
         "Ray": "./src/environment/datatypes/Ray",
         "UDim": "./src/environment/datatypes/UDim",
         "UDim2": "./src/environment/datatypes/UDim2",

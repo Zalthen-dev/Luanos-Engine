@@ -3,6 +3,8 @@ local rl = require("@raylib")
 local imgui = require("@rimgui")
 local utils = require("@utils")
 
+local scripteditor = require("./gui/output")
+
 local Skybox = require("./renderer/skybox")
 local Mesh = require("./renderer/mesh")
 
@@ -291,6 +293,7 @@ function renderer.RenderScene()
         DrawTextOutlined(tostring(actuallyDrawn3d) .. " drawn parts", 10, 110, 20, rl.WHITE, 2, rl.BLACK)
 
         imgui.rImGuiBegin()
+        scripteditor:Draw(EngineState);
 
         for _, window in renderer.RenderWindows do
             window:Draw(EngineState)

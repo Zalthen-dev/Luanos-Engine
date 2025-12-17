@@ -6,9 +6,14 @@ local mem = zune.mem
 
 local services = {
     "Workspace",
+    "ServerScriptService",
+    "ServerStorage",
     "StarterGui",
     "Debris",
     "HttpService",
+    "LogService",
+    "RunService",
+    "Selection",
     "TweenService",
     "UserInputService",
 }
@@ -28,16 +33,14 @@ end
 local self
 self = window.Create("Explorer", function(engineState)
     local game = engineState.game
-
-    imgui.SetNextWindowSize(imgui.NewImVec2(200, 600), imgui.IMGUI_COND_ONCE)
-    if imgui.Begin(self.title, self.visible, imgui.IMGUI_WINDOWFLAGS_NO_COLLAPSE) then
-        local servs = GetServices(game)
+    local servs = GetServices(game)
         
-        for _, serv in ipairs(servs) do
-            self.TreeRender(game, serv)
-        end
-    end; imgui.End()
+    for _, serv in ipairs(servs) do
+        self.TreeRender(game, serv)
+    end
 end)
+
+self.defaultSize = imgui.NewImVec2(200, 600)
 
 -- https://kahwei.dev/2022/06/20/imgui-tree-node/
 -- above link helpful

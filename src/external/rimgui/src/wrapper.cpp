@@ -255,6 +255,18 @@ extern "C" {
         ImGui::EndMainMenuBar();
     }
 
+    bool BeginPopupContextWindow() {
+        return ImGui::BeginPopupContextWindow();
+    }
+
+    bool Selectable(const char* text) {
+        return ImGui::Selectable(text);
+    }
+
+    void EndPopup() {
+        ImGui::EndPopup();
+    }
+
     bool TreeNode(const char* label) {
         return ImGui::TreeNode(label);
     }
@@ -304,10 +316,6 @@ extern "C" {
 
     bool IsItemClicked() {
         return ImGui::IsItemClicked();
-    }
-
-    bool IsItemHovered() {
-        return ImGui::IsItemHovered();
     }
 
     bool IsAnyItemFocused() {

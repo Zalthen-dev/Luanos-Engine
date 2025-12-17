@@ -41,6 +41,14 @@ sandboxer.environment.print = function(...)
 	print(...)
 end
 
+sandboxer.environment.loadstring = function(...)
+	if not engineState.game:GetService("ServerScriptService").LoadStringEnabled then
+		error("loadstring is disabled, to enable, set ServerScriptService.LoadStringEnabled to true")
+	end
+
+	return loadstring(...)
+end
+
 execute("./src/sandboxed/test.luau", "file")
 
 rl.SetConfigFlags(rl.FLAG_WINDOW_RESIZABLE)

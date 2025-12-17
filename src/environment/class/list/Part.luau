@@ -1,12 +1,13 @@
 local Vector3 = require("@Vector3")
 local Color3 = require("@Color3")
+local BrickColor = require("@BrickColor")
 local CFrame = require("@CFrame")
 local Enum = require("@Enum")
 
 local propTable = {
-	Position = Vector3.new(0, 0, 0),
+	Position = Vector3.new(0, 0.5, 0),
 	Size = Vector3.new(4, 1, 2),
-	Color = Color3.new(1, 1, 1),
+	Color = Color3.fromRGB(163, 162, 165),
 	Material = "Plastic",
 	Transparency = 0,
 	Anchored = false,
@@ -21,7 +22,7 @@ local propTable = {
 	Locked = false,
 	Orientation = Vector3.new(0, 0, 0),
 	Rotation = Vector3.new(0, 0, 0),
-	CFrame = CFrame.new(0, 0, 0),
+	CFrame = CFrame.new(0, 0.5, 0),
 	ElapsedTime = 0,
 	Name = "Part",
 }

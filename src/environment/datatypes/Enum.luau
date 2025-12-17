@@ -278,6 +278,13 @@ local Enum = {
         Torus = 5,
     },
 
+    RunContext = {
+        Legacy = 0,
+        Server = 1,
+        Client = 2,
+        Plugin = 3,
+    },
+
     UserInputType = {
         Unknown = 9000,
         Keyboard = 9001,
