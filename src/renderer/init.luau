@@ -242,13 +242,13 @@ function renderer.OnStart(engineState)
     imgui.rImGuiSetup()
     imgui.rImGuiDisableIO()
     Mesh.Load()
-    --Skybox.Load()
+    Skybox.Load()
 end
 
 function renderer.OnEnd()
     imgui.rImGuiShutdown()
     Mesh.Unload()
-    --Skybox.Unload()
+    Skybox.Unload()
 end
 
 function renderer.RenderScene()
@@ -267,7 +267,7 @@ function renderer.RenderScene()
 
         renderer.UpdateFreecam(camera, delta)
         do rl.BeginMode3D(camera)
-            --Skybox.Draw(camera_position)
+            Skybox.Draw(camera_position)
             
             for i, part in renderer.RenderPool3D do
                 local part = part()
