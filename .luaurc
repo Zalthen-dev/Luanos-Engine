@@ -1,5 +1,6 @@
 {
     "aliases": {
+        "core": "./src/core",
         "raylib": "./src/external/raylib",
         "raykeys": "./src/external/raykeys",
         "rimgui": "./src/external/rimgui",

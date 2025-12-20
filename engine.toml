@@ -1,0 +1,6 @@
+# Engine configuration options
+
+[window]
+fps = 360
+fps_unfocused = 10
+reduce_fps_on_unfocus = true

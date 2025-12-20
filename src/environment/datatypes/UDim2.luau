@@ -12,17 +12,11 @@ function UDim2.new(xScale, xOffset, yScale, yOffset)
 end
 
 function UDim2.fromScale(x, y)
-    return setmetatable({
-        X = UDim.new(x, 0),
-        Y = UDim.new(y, 0)
-    }, UDim2)
+    return UDim2.new(x, 0, y, 0)
 end
 
 function UDim2.fromOffset(x, y)
-    return setmetatable({
-        X = UDim.new(0, x),
-        Y = UDim.new(0, y)
-    }, UDim2)
+    return UDim2.new(0, x, 0, y)
 end
 
 function UDim2:Lerp(other, alpha)

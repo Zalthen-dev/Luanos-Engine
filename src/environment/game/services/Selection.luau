@@ -27,4 +27,8 @@ function Selection:Set(objects)
     end
 end
 
+function Selection:_IsSelected(object)
+    return table.find(selected, object) ~= nil
+end
+
 return Selection

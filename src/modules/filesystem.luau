@@ -1,4 +1,5 @@
 local fs = zune.fs
+local serde = zune.serde
 
 local filesystem = {}
 
@@ -21,6 +22,10 @@ end
 
 function filesystem.read(file)
     return fs.readFile(file)
+end
+
+function filesystem.readtoml(file)
+    return serde.toml.decode(fs.readFile(file))
 end
 
 return filesystem

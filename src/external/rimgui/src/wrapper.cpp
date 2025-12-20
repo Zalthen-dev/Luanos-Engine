@@ -1,10 +1,11 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <string>
+#include <cstdint>
 
-#include "imgui/imgui_internal.h"
 #include "imgui/imgui.h"
 #include "rlImGui/rlImGui.h"
+#include "imgui/imgui_internal.h"
 
 #include "texteditor/texteditor.h"
 
@@ -49,10 +50,11 @@ extern "C" {
     const int IMGUI_TREENODEFLAGS_UPSIDEDOWNARROW = 1 << 29;
 
     ImVec2_FFI cImVec2(float x, float y) {
-        ImVec2_FFI v;
-        v.x = x;
-        v.y = y;
-        return v;
+        return {x, y};
+    }
+
+    ImVec4_FFI cImVec4(ImVec4 vec) {
+        return {vec.x, vec.y, vec.z, vec.w};
     }
 
     void rImGuiSetup() {
@@ -69,6 +71,14 @@ extern "C" {
 
     void rImGuiEnd() {
         rlImGuiEnd();
+    }
+
+    void rImGuiEnableDocking() {
+        ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    }
+
+    void rImGuiDisableDocking() {
+        ImGui::GetIO().ConfigFlags &= ImGuiConfigFlags_DockingEnable;
     }
 
     void rImGuiDisableIO() {
@@ -99,6 +109,10 @@ extern "C" {
 
     void Text(const char* text) {
         ImGui::Text(text);
+    }
+
+    void TextLinkOpenURL(const char* text, const char* link) {
+        ImGui::TextLinkOpenURL(text, link);
     }
 
     void TextColored(ImVec4_FFI color, const char* text) {
@@ -161,6 +175,10 @@ extern "C" {
         ImGui::NewLine();
     }
 
+    void SameLine() {
+        ImGui::SameLine();
+    }
+
     void Separator() {
         ImGui::Separator();
     }
@@ -168,7 +186,7 @@ extern "C" {
     void SeparatorText(const char* label) {
         ImGui::SeparatorText(label);
     }
-
+    
     bool BeginCombo(const char* label, const char* preview_value, int flags) {
         return ImGui::BeginCombo(label, preview_value, flags);
     }
@@ -302,24 +320,8 @@ extern "C" {
         return cImVec2(size.x, size.y);
     }
 
-    void SetCursorPosX(int x) {
-        ImGui::SetCursorPosX(x);
-    }
-
-    void SetCursorPosY(int y) {
-        ImGui::SetCursorPosY(y);
-    }
-
-    bool IsItemHovered(int flags) {
-        return ImGui::IsItemHovered(flags);
-    }
-
-    bool IsItemClicked() {
-        return ImGui::IsItemClicked();
-    }
-
-    bool IsAnyItemFocused() {
-        return ImGui::IsAnyItemFocused();
+    void SetTooltip(const char* text) {
+        ImGui::SetTooltip("%s", text);
     }
 
     void BeginTooltip() {
@@ -354,6 +356,56 @@ extern "C" {
         ImGui::EndTabItem();
     }
 
+    void igImage(unsigned int textureId, float width, float height) {
+        ImGui::Image(
+            (ImTextureID)(uintptr_t)textureId, 
+            ImVec2(width, height)
+        );
+    }
+
+    void igImageWithBg(unsigned int textureId, ImVec2_FFI size) {
+        ImGui::ImageWithBg(
+            (ImTextureRef)textureId, 
+            ImVec2(size.x, size.y)
+        );
+    }
+
+    ImGuiViewport* GetMainViewport() {
+        return ImGui::GetMainViewport();
+    }
+
+    unsigned int DockSpaceOverViewport(int dockspace_id, void* viewport_id, int flags) {
+        return ImGui::DockSpaceOverViewport(dockspace_id, (const ImGuiViewport*)viewport_id, (ImGuiDockNodeFlags)flags);
+    }
+
+    void* DockBuilderGetNode(unsigned int node_id) {
+        return ImGui::DockBuilderGetNode(node_id);
+    }
+
+    unsigned int DockBuilderAddNode(unsigned int node_id, int flags) {
+        return ImGui::DockBuilderAddNode(node_id, (ImGuiDockNodeFlags)flags);
+    }
+
+    void DockBuilderSetNodeSize(unsigned int node_id, ImVec2_FFI size) {
+        ImGui::DockBuilderSetNodeSize(node_id, ImVec2(size.x, size.y));
+    }
+
+    unsigned int DockBuilderSplitNode(unsigned int node_id, int split_dir, float size_ratio_for_node_at_dir, unsigned int* out_id_at_dir, unsigned int* out_id_at_opposite_dir) {
+        return ImGui::DockBuilderSplitNode(node_id, (ImGuiDir)split_dir, size_ratio_for_node_at_dir, out_id_at_dir, out_id_at_opposite_dir);
+    }
+
+    void DockBuilderDockWindow(const char* window_name, unsigned int node_id) {
+        ImGui::DockBuilderDockWindow(window_name, node_id);
+    }
+
+    void DockBuilderFinish(unsigned int node_id) {
+        ImGui::DockBuilderFinish(node_id);
+    }
+
+    // text editor
+    // TODO: make it more customizable
+    // like making it not only multi-line, and additional things
+
     TextEditor* TextEditorCreate(int initialSize) {
         size_t initial_capacity = initialSize;
         return TextEditor_Create(initial_capacity);
@@ -377,5 +429,221 @@ extern "C" {
 
     void TextEditorDestroy(TextEditor* textEditor) {
         TextEditor_Destroy(textEditor);
+    }
+
+    // push & pop
+
+    ImVec4_FFI GetStyleColor(int idx) {
+        return cImVec4(ImGui::GetStyleColorVec4((ImGuiCol)idx));
+    }
+
+    void PushStyleColor(int style, ImVec4_FFI color) {
+        ImGui::PushStyleColor((ImGuiCol)style, ImVec4(color.x, color.y, color.z, color.w));
+    }
+
+    void PopStyleColor(int count) {
+        ImGui::PopStyleColor(count);
+    }
+
+    void PushStyleVarFloat(int idx, float val) {
+        ImGui::PushStyleVar(idx, val);
+    }
+
+    void PushStyleVarVec2(int idx, ImVec2_FFI val) {
+        ImGui::PushStyleVar(idx, ImVec2(val.x, val.y));
+    }
+
+    void PopStyleVar(int count) {
+        ImGui::PopStyleVar(count);
+    }
+
+    void PushID(const char* str_id) {
+        ImGui::PushID(str_id);
+    }
+
+    void PopID() {
+        ImGui::PopID();
+    }
+
+    // get & set stuff
+
+    ImVec2_FFI GetCursorScreenPos() {
+        ImVec2 pos = ImGui::GetCursorScreenPos();
+        return cImVec2(pos.x, pos.y);
+    }
+
+    void SetCursorPosX(int x) {
+        ImGui::SetCursorPosX(x);
+    }
+
+    void SetCursorPosY(int y) {
+        ImGui::SetCursorPosY(y);
+    }
+
+    float GetFrameHeight() {
+        return ImGui::GetFrameHeight();
+    }
+
+    float GetScrollY() {
+        return ImGui::GetScrollY();
+    }
+
+    float GetScrollMaxY() {
+        return ImGui::GetScrollMaxY();
+    }
+
+    void SetScrollHereY(float center_y_ratio) {
+        ImGui::SetScrollHereY(center_y_ratio);
+    }
+
+    void SetItemDefaultFocus() {
+        ImGui::SetItemDefaultFocus();
+    }
+
+    ImVec2_FFI GetViewportSize(void* viewport) {
+        ImVec2 sz = ((ImGuiViewport*)viewport)->Size;
+        return cImVec2(sz.x, sz.y);
+    }
+
+    // checks
+    bool IsItemClicked() {
+        return ImGui::IsItemClicked();
+    }
+
+    bool IsItemDeactivatedAfterEdit() {
+        return ImGui::IsItemDeactivatedAfterEdit();
+    }
+
+    bool IsItemToggledSelection() {
+        return ImGui::IsItemToggledSelection();
+    }
+
+    bool IsItemToggledOpen() {
+        return ImGui::IsItemToggledOpen();
+    }
+    
+    bool IsAnyItemFocused() {
+        return ImGui::IsAnyItemFocused();
+    }
+
+    bool igIsWindowFocused(int flags) {
+        return ImGui::IsWindowFocused(flags);
+    }
+
+    bool IsWindowHovered(int flags) {
+        return ImGui::IsWindowHovered((ImGuiHoveredFlags)flags);
+    }
+    
+    bool IsAnyItemHovered() {
+        return ImGui::IsAnyItemHovered();
+    }
+
+    bool IsItemHovered(int flags) {
+        return ImGui::IsItemHovered((ImGuiHoveredFlags)flags);
+    }
+
+    bool IsItemActive() {
+        return ImGui::IsItemActive();
+    }
+
+    bool IsMouseDoubleClicked(int button) {
+        return ImGui::IsMouseDoubleClicked(button);
+    }
+    
+    bool IsMouseDragging(int button, float lock_threshold) {
+        return ImGui::IsMouseDragging(button, lock_threshold);
+    }
+
+    bool IsMouseReleased(int button) {
+        return ImGui::IsMouseReleased(button);
+    }
+
+    // styles
+
+    void SetStyleDark() {
+        ImGui::StyleColorsDark();
+    }
+
+    void SetStyleLight() {
+        ImGui::StyleColorsLight();
+    }
+
+    // thanks to MomoDeve
+    // https://github.com/ocornut/imgui/issues/707#issuecomment-670976818
+    void SetStyleVisualStudioDarkBlue() {
+        constexpr auto ColorFromBytes = [](uint8_t r, uint8_t g, uint8_t b) {
+            return ImVec4((float)r / 255.0f, (float)g / 255.0f, (float)b / 255.0f, 1.0f);
+        };
+
+        auto& style = ImGui::GetStyle();
+        ImVec4* colors = style.Colors;
+
+        const ImVec4 bgColor           = ColorFromBytes(37, 37, 38);
+        const ImVec4 lightBgColor      = ColorFromBytes(82, 82, 85);
+        const ImVec4 veryLightBgColor  = ColorFromBytes(90, 90, 95);
+
+        const ImVec4 panelColor        = ColorFromBytes(51, 51, 55);
+        const ImVec4 panelHoverColor   = ColorFromBytes(29, 151, 236);
+        const ImVec4 panelActiveColor  = ColorFromBytes(0, 119, 200);
+
+        const ImVec4 textColor         = ColorFromBytes(255, 255, 255);
+        const ImVec4 textDisabledColor = ColorFromBytes(151, 151, 151);
+        const ImVec4 borderColor       = ColorFromBytes(78, 78, 78);
+
+        colors[ImGuiCol_Text]                 = textColor;
+        colors[ImGuiCol_TextDisabled]         = textDisabledColor;
+        colors[ImGuiCol_TextSelectedBg]       = panelActiveColor;
+        colors[ImGuiCol_WindowBg]             = bgColor;
+        colors[ImGuiCol_ChildBg]              = bgColor;
+        colors[ImGuiCol_PopupBg]              = bgColor;
+        colors[ImGuiCol_Border]               = borderColor;
+        colors[ImGuiCol_BorderShadow]         = borderColor;
+        colors[ImGuiCol_FrameBg]              = panelColor;
+        colors[ImGuiCol_FrameBgHovered]       = panelHoverColor;
+        colors[ImGuiCol_FrameBgActive]        = panelActiveColor;
+        colors[ImGuiCol_TitleBg]              = bgColor;
+        colors[ImGuiCol_TitleBgActive]        = bgColor;
+        colors[ImGuiCol_TitleBgCollapsed]     = bgColor;
+        colors[ImGuiCol_MenuBarBg]            = panelColor;
+        colors[ImGuiCol_ScrollbarBg]          = panelColor;
+        colors[ImGuiCol_ScrollbarGrab]        = lightBgColor;
+        colors[ImGuiCol_ScrollbarGrabHovered] = veryLightBgColor;
+        colors[ImGuiCol_ScrollbarGrabActive]  = veryLightBgColor;
+        colors[ImGuiCol_CheckMark]            = panelActiveColor;
+        colors[ImGuiCol_SliderGrab]           = panelHoverColor;
+        colors[ImGuiCol_SliderGrabActive]     = panelActiveColor;
+        colors[ImGuiCol_Button]               = panelColor;
+        colors[ImGuiCol_ButtonHovered]        = panelHoverColor;
+        colors[ImGuiCol_ButtonActive]         = panelHoverColor;
+        colors[ImGuiCol_Header]               = panelColor;
+        colors[ImGuiCol_HeaderHovered]        = panelHoverColor;
+        colors[ImGuiCol_HeaderActive]         = panelActiveColor;
+        colors[ImGuiCol_Separator]            = borderColor;
+        colors[ImGuiCol_SeparatorHovered]     = borderColor;
+        colors[ImGuiCol_SeparatorActive]      = borderColor;
+        colors[ImGuiCol_ResizeGrip]           = bgColor;
+        colors[ImGuiCol_ResizeGripHovered]    = panelColor;
+        colors[ImGuiCol_ResizeGripActive]     = lightBgColor;
+        colors[ImGuiCol_PlotLines]            = panelActiveColor;
+        colors[ImGuiCol_PlotLinesHovered]     = panelHoverColor;
+        colors[ImGuiCol_PlotHistogram]        = panelActiveColor;
+        colors[ImGuiCol_PlotHistogramHovered] = panelHoverColor;
+        colors[ImGuiCol_ModalWindowDimBg] = bgColor;
+        colors[ImGuiCol_DragDropTarget]       = bgColor;
+        colors[ImGuiCol_NavHighlight]         = bgColor;
+        colors[ImGuiCol_DockingPreview]       = panelActiveColor;
+        colors[ImGuiCol_Tab]                  = bgColor;
+        colors[ImGuiCol_TabActive]            = panelActiveColor;
+        colors[ImGuiCol_TabUnfocused]         = bgColor;
+        colors[ImGuiCol_TabUnfocusedActive]   = panelActiveColor;
+        colors[ImGuiCol_TabHovered]           = panelHoverColor;
+
+        style.WindowRounding    = 0.0f;
+        style.ChildRounding     = 0.0f;
+        style.FrameRounding     = 0.0f;
+        style.GrabRounding      = 0.0f;
+        style.PopupRounding     = 0.0f;
+        style.ScrollbarRounding = 0.0f;
+        style.TabRounding       = 0.0f;
     }
 }

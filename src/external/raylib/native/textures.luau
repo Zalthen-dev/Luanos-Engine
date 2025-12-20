@@ -20,20 +20,25 @@ type float = number;
 type cstring = string | buffer | FFIPointer;
 type char = number;
 
-local Vector2 = raylib.Vector2;
-local Color = raylib.Color;
-local Rectangle = raylib.Rectangle;
-local Image = raylib.Image;
-local GlyphInfo = raylib.GlyphInfo;
-local Font = raylib.Font;
-type Vector2 = raylib.Vector2;
-type Color = raylib.Color;
-type Rectangle = raylib.Rectangle;
-type Image = raylib.Image;
-type GlyphInfo = raylib.GlyphInfo;
-type Font = raylib.Font;
+local Vector2 = raylib.Vector2
+local Color = raylib.Color
+local Rectangle = raylib.Rectangle
+local Image = raylib.Image
+local GlyphInfo = raylib.GlyphInfo
+local Font = raylib.Font
+local RenderTexture2D = raylib.RenderTexture2D
+local NPatchInfo = raylib.NPatchInfo
+type Vector2 = raylib.Vector2
+type Color = raylib.Color
+type Rectangle = raylib.Rectangle
+type Image = raylib.Image
+type GlyphInfo = raylib.GlyphInfo
+type Font = raylib.Font
+type RenderTexture2D = raylib.RenderTexture2D
+type NPatchInfo = raylib.NPatchInfo
 
 local Texture = raylib.Texture
+local Texture2D = raylib.Texture2D
 local TextureCubemap = raylib.TextureCubemap
 type Texture = raylib.Texture
 type Texture2D = raylib.Texture2D
@@ -109,6 +114,16 @@ export type Fns = {
     LoadTextureFromImage: (image: Image) -> Texture2D,
     LoadTextureCubemap: (image: Image, layout: int) -> TextureCubemap,
     UnloadTexture: (texture: Texture2D) -> (),
+
+    LoadRenderTexture: (width: int, height: int) -> (RenderTexture2D),
+    UnloadRenderTexture: (texture: RenderTexture2D) -> (),
+
+    DrawTexture: (texture: Texture2D, posX: int, posY: int, tint: Color) -> (),
+    DrawTextureV: (texture: Texture2D, position: Vector2, tint: Color) -> (),
+    DrawTextureEx: (texture: Texture2D, position: Vector2, rotation: float, scale: float, tint: Color) -> (),
+    DrawTextureRec: (texture: Texture2D, source: Rectangle, position: Vector2, tint: Color) -> (),
+    DrawTexturePro: (texture: Texture2D, source: Rectangle, dest: Rectangle, origin: Vector2, rotation: float, tint: Color) -> (),
+    DrawTextureNPatch: (texture: Texture2D, nPatchInfo: NPatchInfo, dest: Rectangle, origin: Vector2, rotation: float, tint: Color) -> (),
 };
 
 return {
@@ -174,6 +189,16 @@ return {
         LoadTexture = fn(Texture, { cstring }),
         LoadTextureFromImage = fn(Texture, { Image }),
         LoadTextureCubemap = fn(TextureCubemap, {Image, int}),
-        UnloadTexture = fn(void, { Texture })
+        UnloadTexture = fn(void, { Texture }),
+
+        LoadRenderTexture = fn(RenderTexture2D, {int, int}),
+        UnloadRenderTexture = fn(void, {RenderTexture2D}),
+
+        DrawTexture = fn(void, {Texture2D, int, int, Color}),
+        DrawTextureV = fn(void, {Texture2D, Vector2, Color}),
+        DrawTextureEx = fn(void, {Texture2D, Vector2, float, float, Color}),
+        DrawTextureRec = fn(void, {Texture2D, Rectangle, Vector2, Color}),
+        DrawTexturePro = fn(void, {Texture2D, Rectangle, Rectangle, Vector2, float, Color}),
+        DrawTextureNPatch = fn(void, {Texture2D, NPatchInfo, Rectangle, Vector2, float, Color}),
     }
 }

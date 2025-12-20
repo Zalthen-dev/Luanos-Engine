@@ -19,5 +19,9 @@ for i = 1, parts do
 	part.Name = "Part" .. tostring(i)
 	part.Parent = workspace
 
-	print(tostring(i))
+	if i % 10 == 0 then
+		warn(tostring(i))
+	else
+		print(tostring(i))
+	end
 end

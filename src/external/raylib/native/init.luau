@@ -133,8 +133,8 @@ end
 local export = {};
 
 export.const = raylib;
-export.lib = ffi.dlopen(LIBRARY_PATH, combine(core.def, shapes.def, textures.def, text.def, audio.def, models.def, rlgl.def, rmath.defs, gui.defs)) :: {
+export.lib = ffi.dlopen(LIBRARY_PATH, combine(core.def, shapes.def, textures.def, text.def, audio.def, models.def, rlgl.def, rmath.defs)) :: {
     GetSymbol: (self: FFILibrary, symbol: string) -> FFIPointer?,
-} & core.Fns & shapes.Fns & textures.Fns & text.Fns & audio.Fns & models.Fns & gui.Fns;
+} & core.Fns & shapes.Fns & textures.Fns & text.Fns & audio.Fns & models.Fns;
 
 return export;

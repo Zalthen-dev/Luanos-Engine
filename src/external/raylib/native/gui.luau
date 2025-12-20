@@ -2,8 +2,6 @@ local ffi = zune.ffi
 local fs = zune.fs
 
 local raylib = require("./raylib")
-local text = require("./text")
-local const = raylib
 
 local void = ffi.types.void
 local int = ffi.types.i32
@@ -30,7 +28,7 @@ type Rectangle = typeof(raylib.Rectangle:new({}))
 type font = typeof(raylib.Font:new({}))
 type Vector2 = typeof(Vector2)
 type Color = typeof(raylib.Color:new({}))
-type Vector3 = FFIVectorType
+type Vector3 = raylib.Vector3
 
 local function fn(returns: any, args: { any })
     return {
@@ -108,10 +106,10 @@ export type Fns = {
     GuiColorBarHue: (bounds: Rectangle, text: cstring, value: float) -> int,
     GuiColorPickerHSV: (bounds: Rectangle, text: cstring, colorHSV: Vector3) -> int,
     GuiColorPanelHSV: (bounds: Rectangle, text: cstring, colorHSV: Vector3) -> int
-
 }
 
 return {
+    enabled = false,
     defs = {
         GuiEnable = fn(void, {}),
         GuiDisable = fn(void, {}),
@@ -136,10 +134,10 @@ return {
         GuiSetTooltip = fn(void, {cstring}),
 
         GuiIconText = fn(cstring, {int, cstring}),
-        -- GuiSetIconScale = fn(void, {int}),
-        -- GuiGetIcons = fn(uint, {}),
-        -- GuiLoadIcons = fn(cstring, {cstring, bool}),
-        -- GuiDrawIcons = fn(void, {int, int, int, int, Color}),
+        GuiSetIconScale = fn(void, {int}),
+        GuiGetIcons = fn(uint, {}),
+        GuiLoadIcons = fn(cstring, {cstring, bool}),
+        GuiDrawIcons = fn(void, {int, int, int, int, Color}),
         GuiGetTextWidth = fn(int, {cstring}),
 
         GuiWindowBox = fn(int, {Rectangle, cstring}),
@@ -181,6 +179,5 @@ return {
         GuiColorBarHue = fn(int, {Rectangle, cstring, float}),
         GuiColorPickerHSV = fn(int, {Rectangle, cstring, Vector3}),
         GuiColorPanelHSV = fn(int, {Rectangle, cstring, Vector3})
-
     }
 }

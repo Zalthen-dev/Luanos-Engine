@@ -1,5 +1,4 @@
 #include "texteditor.h"
-#include <cstring>
 
 static int TextEditor_Callback(ImGuiInputTextCallbackData* data) {
     if (data->EventFlag == ImGuiInputTextFlags_CallbackResize) {
@@ -24,16 +23,29 @@ void TextEditor_Destroy(TextEditor* editor) {
 
 bool TextEditor_Draw(TextEditor* editor, const char* label, ImVec2 size, ImGuiInputTextFlags flags) {
     flags |= ImGuiInputTextFlags_CallbackResize;
+    
+    bool changed = false;
 
-    bool changed = ImGui::InputTextMultiline(
-        label,
-        editor->buffer.Data,
-        editor->buffer.Size,
-        size,
-        flags,
-        TextEditor_Callback,
-        editor
-    );
+    if ((flags & (1 << 26)) != 0) {
+        changed = ImGui::InputTextMultiline(
+            label,
+            editor->buffer.Data,
+            editor->buffer.Size,
+            size,
+            flags,
+            TextEditor_Callback,
+            editor
+        );
+    } else {
+        changed = ImGui::InputText(
+            label,
+            editor->buffer.Data,
+            editor->buffer.Size,
+            flags,
+            TextEditor_Callback,
+            editor
+        );
+    }
 
     editor->dirty |= changed;
     return changed;

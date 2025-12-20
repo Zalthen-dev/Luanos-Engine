@@ -6,13 +6,29 @@ local window = {}
 window.__index = window
 window.__type = "Window"
 
-function window.Create(title: string, drawFunc:(any) -> ())
+type WindowAnchor = "left" | "right" | "top" | "bottom" | "fill" | "none"
+type Window = {
+    title: string,
+    defaultSize: FFIPointer,
+    flags: number,
+    visible: FFIPointer,
+    Contained: boolean,
+    anchor: WindowAnchor,
+    anchorPriority: number,
+
+    SetPosition: (number, number) -> (),
+    SetVisibility: (boolean) -> (),
+    Draw: (any) -> (),
+}
+
+function window.Create(title: string, drawFunc:(any) -> ()): Window
     local self = {}
     self.title = title
     self.defaultSize = imgui.NewImVec2(600, 400)
     self.flags = imgui.IMGUI_WINDOWFLAGS_NO_COLLAPSE
     self.visible = utils.BoolPtr(1)
     self.Contained = false
+    self.anchor = "none"
 
     function self:SetPosition(x, y)
         self.Position = vector.create(x or 0, y or 0)

@@ -254,6 +254,7 @@ export type Fns = {
 }
 
 return {
+	enabled = true,
 	def = {
 		-- void InitWindow(int width, int height, const char *title);
 		InitWindow = fn(void, { int, int, cstring }),

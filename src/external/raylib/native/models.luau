@@ -136,6 +136,7 @@ export type Fns = {
 };
 
 return {
+    enabled = true,
     def = {
         -- void DrawLine3D(Vector3 startPos, Vector3 endPos, Color color);
         DrawLine3D = fn(void, { Vector3, Vector3, Color }),

@@ -104,6 +104,7 @@ export type Fns = {
 };
 
 return {
+    enabled = true,
     def = {
         -- void InitAudioDevice(void);
         InitAudioDevice = fn(void, {}),
