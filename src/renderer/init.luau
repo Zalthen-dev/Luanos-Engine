@@ -173,7 +173,7 @@ function renderer.UpdateFreecam(camera: rl.Camera3D, delta: number)
 		end
 
 		local screenRay = rl.GetScreenToWorldRay(mousePos, camera)
-		camera_position += (mem.toVector3(screenRay, 12) * mouseWheelDelta) * (renderer.CAMERA_SCROLLSPEED / 5)
+		camera_position += (mem.toVector3(screenRay, 12) * mouseWheelDelta) * (renderer.CAMERA_SCROLLSPEED / 15)
 	end
 
 	if rl.IsMouseButtonPressed(rl.MOUSE_BUTTON_RIGHT) == 1 then
@@ -214,7 +214,7 @@ function renderer.UpdateFreecam(camera: rl.Camera3D, delta: number)
 	if imgui.IsAnyItemFocused() == 0 then
 		local inputForward = rl.IsKeyDown(rl.KEY_W) - rl.IsKeyDown(rl.KEY_S)
 		local inputSideway = rl.IsKeyDown(rl.KEY_A) - rl.IsKeyDown(rl.KEY_D)
-		local inputUpward = (rl.IsKeyDown(rl.KEY_SPACE) or rl.IsKeyDown(rl.KEY_E)) - rl.IsKeyDown(rl.KEY_Q)
+		local inputUpward = math.max(rl.IsKeyDown(rl.KEY_SPACE), rl.IsKeyDown(rl.KEY_E)) - rl.IsKeyDown(rl.KEY_Q)
 
 		camera_position += forward * (inputForward * moveSpeed)
 		camera_position += right * (inputSideway * moveSpeed)
@@ -348,17 +348,6 @@ function renderer.RenderScene()
 		gui.Draw()
 
 		imgui.rImGuiEnd()
-
-		--[[
-        local texture = mem.slice(gui.renderer().ViewTexture, rl.RenderTexture2D:offset("texture"), rl.Texture:size())
-		local width = buffer.readi32(texture, rl.Texture:offset("width"))
-        local height = buffer.readi32(texture, rl.Texture:offset("height"))
-
-		local source = rl.Rectangle:new({x=0,y=height,width=width,height=-height})
-        local dest = rl.Rectangle:new({x=gui.viewportPos.x, y=gui.viewportPos.y, width=width, height=height})
-
-        rl.DrawTexturePro(texture, source, dest, vector.create(0, 0), 0, rl.WHITE)
-        ]]
     end; rl.EndDrawing()
 
 	renderer.MainSignal:Fire("Heartbeat", delta)

@@ -1,46 +1,40 @@
 local imgui = require("@rimgui")
 local window = require("@window")
-local Enum = require("@Enum")
-local rl = require("@raylib")
 
-local self
-self = window.Create("Output", function(engineState)
-    --[[
-    if not self.newMessageEnv then
-        engineState.game:GetService("LogService").MessageOut:Connect(function(message, messageType)
-            table.insert(self.logs, {
-                text = message,
-                logType = messageType
-            })
-        end)
-    end
-    ]]
+local self = {}
+self = window.Create(function()
+	local engineState = self.renderer().EngineState
+	local game = engineState.game
 
-    imgui.Separator()
+	local LogService = game:GetService("LogService")
 
-    local availSize = imgui.FromImVec2(imgui.GetContentRegionAvail())
-    if imgui.BeginChild("OutputScrolling", imgui.NewImVec2(availSize.x, availSize.y), false, 0) then
-        --[[
-        if imgui.BeginPopupContextWindow() == 1 then
+	if imgui.Begin("Output", self.visible) == 1 then
+		local availSize = imgui.FromImVec2(imgui.GetContentRegionAvail())
+		if
+			imgui.BeginChild(
+				"OutputScrolling",
+				imgui.NewImVec2(availSize.x, availSize.y),
+				false,
+				imgui.IMGUI_WINDOWFLAGS_HORIZONTAL_SCROLLBAR
+			)
+		then
+			local logList = LogService:GetLogHistory()
 
-            if imgui.Selectable("Clear") == 1 then
-                table.clear(self.logs)
-            end
+			local count = #logList
+			for i, log in logList do
+				if i >= (count - 5000) then
+					local text = ("[ %010i ]: %s"):format(log.timestamp, log.message)
+					imgui.TextUnformatted(text)
+				end
+			end
 
-            imgui.EndPopup()
-        end
-        ]]
-
-        local logList = engineState.game:GetService("LogService"):GetLogHistory()
-        local count = #logList
-        for i, log in logList do
-            if i >= (count - 5000) then
-                imgui.TextUnformatted(log.message)
-            end
-        end
-    end; imgui.EndChild()    
+			if imgui.GetScrollY() >= imgui.GetScrollMaxY() - 1 then
+				imgui.SetScrollHereY(1)
+			end
+		end
+		imgui.EndChild()
+	end
+	imgui.End()
 end)
 
-self.defaultSize = imgui.NewImVec2(520, 600)
---self.logs = {}
 return self

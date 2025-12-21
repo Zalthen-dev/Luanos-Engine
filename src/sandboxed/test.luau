@@ -18,10 +18,4 @@ for i = 1, parts do
 	part.Position = Vector3.new(math.random(-mpos, mpos), 0.5 + math.random(0, mpos/2), math.random(-mpos, mpos))
 	part.Name = "Part" .. tostring(i)
 	part.Parent = workspace
-
-	if i % 10 == 0 then
-		warn(tostring(i))
-	else
-		print(tostring(i))
-	end
 end

@@ -14,7 +14,7 @@ function filesystem.entryloop(path, callback)
     end)
 
     if not success and msg then
-        print(msg)
+        print("WARN: " .. msg)
     end
     
     return success

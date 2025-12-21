@@ -88,8 +88,8 @@ type Fns = {
     rImGuiBegin: () -> (),
     rImGuiEnd: () -> (),
     
-
-    rImGui_ShowDemoWindow: () -> (),
+    ShowDemoWindow: () -> (),
+    ShowStyleEditor: () -> (),
 
     Begin: (label:cstring, p_open:FFIPointer, flags:int?) -> (bool),
     End: () -> (),
@@ -148,7 +148,6 @@ type Fns = {
     BeginTabItem: (cstring, FFIPointer, int) -> (bool),
     EndTabItem: () -> (),
 
-    GetStyleColor: (int) -> (ImVec4),
     GetWindowSize: () -> (ImVec2),
     GetContentRegionAvail: () -> (ImVec2),
     GetViewportSize: (FFIPointer) -> (ImVec2),
@@ -173,7 +172,7 @@ type Fns = {
     BeginTooltip: () -> (),
     EndTooltip: () -> (),
 
-    igImage: (uint, float, float) -> (),
+    igImage: (uint, float, float, ImVec2, ImVec2) -> (),
 
     GetScrollY: () -> (float),
     GetScrollMaxY: () -> (float),
@@ -194,9 +193,13 @@ type Fns = {
     TextEditorDraw: (FFIPointer, cstring, ImVec2, int) -> (),
     TextEditorDestroy: (FFIPointer) -> (),
 
+    SetStyleRounding: (windowRounding: float, childRounding: float, frameRounding: float, grabRounding: float, popupRounding: float, scrollbarRounding: float, tabRounding: float) -> (),
+    SetStyleColor: (int, ImVec4) -> (),
+    GetStyleColor: (int) -> (ImVec4),
     SetStyleDark: () -> (),
     SetStyleLight: () -> (),
     SetStyleVisualStudioDarkBlue: () -> (),
+    SetStyleClassicSteamVGUI: () -> (),
 }
 
 local defs = {
@@ -212,7 +215,8 @@ local defs = {
     rImGuiBegin = fn(void, {}),
     rImGuiEnd = fn(void, {}),
 
-    rImGui_ShowDemoWindow = fn(void, {}),
+    ShowDemoWindow = fn(void, {}),
+    ShowStyleEditor = fn(void, {}),
 
     Begin = fn(bool, {cstring, pointer_bool, int}),
     End = fn(void, {}),
@@ -271,7 +275,6 @@ local defs = {
     BeginTabItem = fn(bool, {cstring, pointer, int}),
     EndTabItem = fn(void, {}),
     
-    GetStyleColor = fn(ImVec4, {int}),
     GetWindowSize = fn(ImVec2, {}),
     GetContentRegionAvail = fn(ImVec2, {}),
     GetViewportSize = fn(ImVec2, {pointer}),
@@ -295,7 +298,7 @@ local defs = {
     BeginTooltip = fn(void, {}),
     EndTooltip = fn(void, {}),
 
-    igImage = fn(void, {}),
+    igImage = fn(void, {uint, float, float, ImVec2, ImVec2}),
 
     GetScrollY = fn(float, {}),
     GetScrollMaxY = fn(float, {}),
@@ -316,9 +319,13 @@ local defs = {
     TextEditorDraw = fn(void, {pointer, cstring, ImVec2, int}),
     TextEditorDestroy = fn(void, {}),
 
+    SetStyleRounding = fn(void, {float, float, float, float, float, float, float}),
+    SetStyleColor = fn(void, {int, ImVec4}),
+    GetStyleColor = fn(ImVec4, {int}),
     SetStyleDark = fn(void, {}),
     SetStyleLight = fn(void, {}),
     SetStyleVisualStudioDarkBlue = fn(void, {}),
+    SetStyleClassicSteamVGUI = fn(void, {}),
 }
 
 local libLocation = "./src/external/rimgui/bin/librimgui.so"
@@ -412,22 +419,32 @@ return {
     IMGUI_COL_TABACTIVE             = 35,
     IMGUI_COL_TABUNFOCUSED          = 36,
     IMGUI_COL_TABUNFOCUSEDACTIVE    = 37,
-    IMGUI_COL_PLOTLINES             = 38,
-    IMGUI_COL_PLOTLINESHOVERED      = 39,
-    IMGUI_COL_PLOTHISTOGRAM         = 40,
-    IMGUI_COL_PLOTHISTOGRAMHOVERED  = 41,
-    IMGUI_COL_TABLEHEADERBG         = 42,
-    IMGUI_COL_TABLEBORDERSTRONG     = 43,
-    IMGUI_COL_TABLEBORDERLIGHT      = 44,
-    IMGUI_COL_TABLEROWBG            = 45,
-    IMGUI_COL_TABLEROWBGALT         = 46,
-    IMGUI_COL_TEXTSELECTEDBG        = 47,
-    IMGUI_COL_DRAGDROPTARGET        = 48,
-    IMGUI_COL_NAVHIGHLIGHT          = 49,
-    IMGUI_COL_NAVWINDOWINGHIGHLIGHT = 50,
-    IMGUI_COL_NAVWINDOWDIMBG        = 51,
-    IMGUI_COL_MODALWINDOWDIMBG      = 52,
-
+    IMGUI_COL_TABDIMMED             = 38,
+    IMGUI_COL_TABDIMMEDSELECTED     = 39,
+    IMGUI_COL_TABDIMMEDSELECTEDOVERLINE = 40,
+    IMGUI_COL_DOCKINGPREVIEW        = 41,
+    IMGUI_COL_DOCKINGEMPTYBG        = 42,
+    IMGUI_COL_PLOTLINES             = 43,
+    IMGUI_COL_PLOTLINESHOVERED      = 44,
+    IMGUI_COL_PLOTHISTOGRAM         = 45,
+    IMGUI_COL_PLOTHISTOGRAMHOVERED  = 46,
+    IMGUI_COL_TABLEHEADERBG         = 47,
+    IMGUI_COL_TABLEBORDERSTRONG     = 48,
+    IMGUI_COL_TABLEBORDERLIGHT      = 49,
+    IMGUI_COL_TABLEROWBG            = 50,
+    IMGUI_COL_TABLEROWBGALT         = 51,
+    IMGUI_COL_TEXTLINK              = 52,
+    IMGUI_COL_TEXTSELECTEDBG        = 53,
+    IMGUI_COL_TREELINES             = 54,
+    IMGUI_COL_DRAGDROPTARGET        = 55,
+    IMGUI_COL_DRAGDROPTARGETBG      = 56,
+    IMGUI_COL_UNSAVEDMARKER         = 57,
+    IMGUI_COL_NAVHIGHLIGHT          = 58,
+    IMGUI_COL_NAVWINDOWINGHIGHLIGHT = 59,
+    IMGUI_COL_NAVWINDOWINGDIMBG     = 60,
+    IMGUI_COL_MODALWINDOWDIMGB      = 61,
+    IMGUI_COL_COUNT                 = 62,
+    
     IMGUI_INPUTTEXTFLAGS_NONE                   = 0,
     IMGUI_INPUTTEXTFLAGS_CHARS_DECIMAL          = 1,
     IMGUI_INPUTTEXTFLAGS_CHARS_HEXADECIMAL      = 2,
@@ -582,7 +599,9 @@ return {
     rImGuiShutdown = lib.rImGuiShutdown,
     rImGuiBegin = lib.rImGuiBegin,
     rImGuiEnd = lib.rImGuiEnd,
-    rImGui_ShowDemoWindow = lib.rImGui_ShowDemoWindow,
+
+    ShowDemoWindow = lib.ShowDemoWindow,
+    ShowStyleEditor = lib.ShowStyleEditor,
 
     Begin = function(text: string, p_open: FFIPointer?, flags: int?) return lib.Begin(text, p_open, flags or 0) end,
     End = lib.End,
@@ -656,7 +675,6 @@ return {
     BeginTabItem = lib.BeginTabItem,
     EndTabItem = lib.EndTabItem,
 
-    GetStyleColor = lib.GetStyleColor,
     GetWindowSize = lib.GetWindowSize,
     GetContentRegionAvail = lib.GetContentRegionAvail,
     GetViewportSize = lib.GetViewportSize,
@@ -706,9 +724,13 @@ return {
     TextEditorDraw = lib.TextEditorDraw,
     TextEditorDestroy = lib.TextEditorDestroy,
 
+    SetStyleRounding = lib.SetStyleRounding,
+    SetStyleColor = lib.SetStyleColor,
+    GetStyleColor = lib.GetStyleColor,
     SetStyleDark = lib.SetStyleDark,
     SetStyleLight = lib.SetStyleLight,
     SetStyleVisualStudioDarkBlue = lib.SetStyleVisualStudioDarkBlue,
+    SetStyleClassicSteamVGUI = lib.SetStyleClassicSteamVGUI,
 
     NewImVec2 = function(x, y)
         return ImVec2:new({x=x, y=y})
