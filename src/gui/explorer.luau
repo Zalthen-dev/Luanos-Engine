@@ -69,7 +69,6 @@ self = window.Create(function()
 		-- it worked fine for objects without children though cause they always returned 1.
 		local nodeResult = imgui.TreeNodeEx(obj.Name, flags)
 		if imgui.IsItemClicked() == 1 then
-			print(nodeResult)
 			if Selection:_IsSelected(obj) then
 				if rl.IsKeyDown(rl.KEY_LEFT_SHIFT) == 1 then
 					Selection:Remove({ obj })
