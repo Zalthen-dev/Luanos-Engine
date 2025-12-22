@@ -311,8 +311,10 @@ function renderer.Render3DScene()
 			if part.Transparency >= 1 then continue end
 			if part.Size.Magnitude <= 1e-6 then continue end
 
-			DrawPart(part)
-			renderer.ActuallyDrawn3D += 1
+			if ShouldDrawPart(part, camera, camera_position, camera_target, camera_fovy) then
+				DrawPart(part)
+				renderer.ActuallyDrawn3D += 1
+			end
 		end
 	end; rl.EndMode3D()
 
