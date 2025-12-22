@@ -19,8 +19,7 @@ local function PropertiesObject(obj)
 
     for k, v in pairs(t) do
         local vType = typeof(v)
-        local readOnly = false
-
+        
         if vType == "table" and v.__type then
             vType = v.__type
         end
@@ -32,6 +31,8 @@ local function PropertiesObject(obj)
         if k == "Children" then
             continue
         end
+        
+        local readOnly = false
 
         if k == "ClassName" then
             readOnly = true
