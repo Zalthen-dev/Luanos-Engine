@@ -1,4 +1,6 @@
 local Signal = {}
+-- add signal type for properties.
+Signal.__type = "Signal"
 Signal.__index = Signal
 
 local Connection = {}
