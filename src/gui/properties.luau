@@ -19,6 +19,7 @@ local function PropertiesObject(obj)
 
     for k, v in pairs(t) do
         local vType = typeof(v)
+        
         if vType == "table" and v.__type then
             vType = v.__type
         end
@@ -26,11 +27,13 @@ local function PropertiesObject(obj)
         if vType == "function" then
             continue
         end
+
         if k == "Children" then
             continue
         end
-
+        
         local readOnly = false
+
         if k == "ClassName" then
             readOnly = true
         end
@@ -38,6 +41,19 @@ local function PropertiesObject(obj)
         if k == "Parent" then
             v = v.Name
         end
+
+        -- hide signals
+        if vType == "Signal" then
+            continue
+        end
+
+        -- hide internal properties
+        if string.sub(k, 1, 1) == "_" then
+            continue
+        end
+
+        -- TODO: add ability to edit properties
+        -- for now, you can view them
         imgui.Text(("%s: %s"):format(k, tostring(v)))
     end
 end

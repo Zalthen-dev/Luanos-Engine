@@ -281,6 +281,10 @@ extern "C" {
         return ImGui::BeginPopupContextWindow();
     }
 
+    bool BeginPopupContextItem() {
+        return ImGui::BeginPopupContextItem();
+    }
+
     bool BeginPopupModal(const char* name, bool* p_open, int flags) {
         return ImGui::BeginPopupModal(name, p_open, flags);
     }
@@ -303,6 +307,10 @@ extern "C" {
 
     void TreePop() {
         ImGui::TreePop();
+    }
+
+    void SetNextItemOpen(bool is_open, int cond) {
+        ImGui::SetNextItemOpen(is_open, cond);
     }
 
     void SetNextWindowSize(ImVec2_FFI size, int condition) {

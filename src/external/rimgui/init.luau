@@ -102,6 +102,7 @@ type Fns = {
     BeginMainMenuBar: () -> (bool),
     EndMainMenuBar: () -> (),
     BeginPopupContextWindow: () -> (bool),
+    BeginPopupContextItem: () -> (bool),
     EndPopup: () -> (),
     BeginCombo: (string, string, int) -> (bool),
     EndCombo: () -> (),
@@ -156,6 +157,7 @@ type Fns = {
     SetCursorPosX: (int) -> (),
     SetCursorPosY: (int) -> (),
     SetNextWindowSize: (ImVec2, int) -> (),
+    SetNextItemOpen: (bool, int) -> (),
 
     IsItemClicked: () -> (),
     IsMouseDoubleClicked: (int) -> (bool),
@@ -229,6 +231,7 @@ local defs = {
     BeginMainMenuBar = fn(bool, {}),
     EndMainMenuBar = fn(void, {}),
     BeginPopupContextWindow = fn(bool, {}),
+    BeginPopupContextItem = fn(bool, {}),
     EndPopup = fn(void, {}),
     BeginCombo = fn(bool, {cstring, cstring, int}),
     EndCombo = fn(void, {}),
@@ -283,6 +286,7 @@ local defs = {
     SetCursorPosX = fn(void, {int}),
     SetCursorPosY = fn(void, {int}),
     SetNextWindowSize = fn(void, {ImVec2, int}),
+    SetNextItemOpen = fn(void, {bool, int}),
 
     IsItemClicked = fn(bool, {}),
     IsMouseDoubleClicked = fn(bool, {int}),
@@ -620,6 +624,7 @@ return {
     BeginMainMenuBar = lib.BeginMainMenuBar,
     EndMainMenuBar = lib.EndMainMenuBar,
     BeginPopupContextWindow = lib.BeginPopupContextWindow,
+    BeginPopupContextItem = lib.BeginPopupContextItem,
     EndPopup = lib.EndPopup,
     BeginCombo = lib.BeginCombo,
     EndCombo = lib.EndCombo,
@@ -683,6 +688,7 @@ return {
     SetCursorPosX = lib.SetCursorPosX,
     SetCursorPosY = lib.SetCursorPosY,
     SetNextWindowSize = lib.SetNextWindowSize,
+    SetNextItemOpen = lib.SetNextItemOpen,
 
     IsAnyItemFocused = lib.IsAnyItemFocused,
     IsItemHovered = function(flag: number?) 
