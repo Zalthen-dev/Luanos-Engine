@@ -65,10 +65,10 @@ self = window.Create(function()
 			obj._NODE_FORCE_EXPAND = nil
 		end
 
-		-- removed the if statement cause it was only returning 1 for objects with children when they were open.
-		-- if the object was closed, the click event wouldnt trigger.
-		-- it worked fine for objects without children though cause they always returned 1.
-		local nodeResult = imgui.TreeNodeEx(obj.Name, flags)
+		-- ImGui doesnt permit us to have two objects with the same name
+		-- so using the UniqueId should fix this
+		local nodeName = obj.Name .. "##" .. obj.UniqueId
+		local nodeResult = imgui.TreeNodeEx(nodeName, flags)
 		if imgui.IsItemClicked() == 1 then
 			if Selection:_IsSelected(obj) then
 				if rl.IsKeyDown(rl.KEY_LEFT_SHIFT) == 1 then
@@ -90,9 +90,27 @@ self = window.Create(function()
 			obj:Destroy()
 		end
 
-		-- replaced BeginPopupContextWindow() with BeginPopupContextItem().
-		-- im guessing BeginPopupContextWindow was using the first item (and its obj) which was UserInputService.
 		if imgui.BeginPopupContextItem() == 1 then
+			imgui.TextDisabled("Cut")
+			imgui.TextDisabled("Copy")
+
+			if imgui.Selectable("Duplicate") == 1 then 
+				local newObj = obj:Clone()
+				newObj.Name = obj.Name
+				newObj.Parent = obj.Parent
+
+				Selection:Remove(obj)
+				Selection:Add({newObj})
+			end
+
+			if imgui.Selectable("Delete") == 1 then
+				Selection:Remove({ obj })
+				obj:Destroy()
+			end
+
+			imgui.TextDisabled("Rename")
+			imgui.Separator()
+
 			if imgui.Selectable("Select Children") == 1 then
 				Selection:Set(obj:GetChildren())
 				obj._NODE_FORCE_EXPAND = true
