@@ -83,7 +83,7 @@ function skybox.Load()
     rayutils.SetShaderLocation(skybox.Shader, rl.SHADER_LOC_MAP_CUBEMAP, envLoc)
     rayutils.SetMaterialShaderOnModel(skybox.Model, skybox.Shader)
 
-    local img = rl.LoadImage("./src/assets/sky/sky_bluecloudnebula.png")
+    local img = rl.LoadImage("./src/assets/sky/sky_sunset.png")
     skybox.CubeMap = rl.LoadTextureCubemap(img, rl.CUBEMAP_LAYOUT_CROSS_FOUR_BY_THREE)
     rl.UnloadImage(img)
 

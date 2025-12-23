@@ -17,7 +17,7 @@ center.Position = originPos
 center.Parent = workspace
 
 local parts = 500
-local mpos = 1024
+local mpos = 1000
 for i = 1, parts do
 	local part = Instance.new("Part")
 	part.Color = Color3.new(math.random(), math.random(), math.random())

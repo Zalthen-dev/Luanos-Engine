@@ -17,6 +17,10 @@ Workspace:SetProperties({
     FallHeightEnabled = true,
 })
 
+function Workspace:Raycast()
+
+end
+
 local function LoopRegister(renderer, v)
     if v:IsA("Model") then
         local children = v:GetChildren()

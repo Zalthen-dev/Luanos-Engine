@@ -52,6 +52,8 @@ local function PropertiesObject(obj)
             continue
         end
 
+        -- TODO: add ability to edit properties
+        -- for now, you can view them
         imgui.Text(("%s: %s"):format(k, tostring(v)))
     end
 end

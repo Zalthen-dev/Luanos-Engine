@@ -283,6 +283,11 @@ local Enum = {
         Torus = 5,
     },
 
+    RaycastFilterType = {
+        Exclude = 0,
+        Include = 1,
+    },
+
     RunContext = {
         Legacy = 0,
         Server = 1,

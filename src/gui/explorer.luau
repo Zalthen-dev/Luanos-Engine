@@ -9,15 +9,16 @@ local services = {
 	"ServerScriptService",
 	"ServerStorage",
 	"StarterGui",
+	"CollectionService",
 	"Debris",
 	"HttpService",
 	"LogService",
+	--"ModuleTrackerService",
 	"RunService",
 	"Selection",
 	"TweenService",
 	"UserInputService",
 }
-
 
 registry.getNameList()
 
