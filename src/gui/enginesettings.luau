@@ -71,14 +71,14 @@ self = window.Create(function()
 		end
 	end
 
-	imgui.SetNextWindowSize(imgui.NewImVec2(400, 400), imgui.IMGUI_COND_APPEARING)
+	imgui.SetNextWindowSize(imgui.NewImVec2(400, 400), imgui.COND.APPEARING)
 	if imgui.Begin("Luanos Engine - Settings", self.visible) == 1 then
-		if imgui.TreeNodeEx("Camera", imgui.IMGUI_TREENODEFLAGS_DEFAULTOPEN) == 1 then
+		if imgui.TreeNodeEx("Camera", imgui.TREE_NODE_FLAGS.DEFAULTOPEN) == 1 then
 			CategoryCameraOptions()
 			imgui.TreePop()
 		end
 
-		if imgui.TreeNodeEx("General", imgui.IMGUI_TREENODEFLAGS_DEFAULTOPEN) == 1 then
+		if imgui.TreeNodeEx("General", imgui.TREE_NODE_FLAGS.DEFAULTOPEN) == 1 then
 			CategoryGeneralOptions()
 			imgui.TreePop()
 		end

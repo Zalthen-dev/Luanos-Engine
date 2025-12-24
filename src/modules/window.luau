@@ -13,6 +13,7 @@ window.__type = "Window"
 ]]
 function window.Create(drawFunc: (any) -> ())
 	local self = {}
+	self.title = ""
 	self.visible = utils.BoolPtr(1)
 
 	function self:SetVisibility(visible: boolean)

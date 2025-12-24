@@ -7,7 +7,10 @@ function Vector3.__index(self, key)
         local x, y, z = rawget(self, "X"), rawget(self, "Y"), rawget(self, "Z")
         return math.sqrt(x*x + y*y + z*z)
     end
-
+    -- __type wasnt working for vector3 so i had to improvise..
+    if key == "__type" then
+        return "Vector3"
+    end
     return rawget(self, key)
 end
 

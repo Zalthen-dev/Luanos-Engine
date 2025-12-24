@@ -15,7 +15,7 @@ self = window.Create(function()
 				"OutputScrolling",
 				imgui.NewImVec2(availSize.x, availSize.y),
 				false,
-				imgui.IMGUI_WINDOWFLAGS_HORIZONTAL_SCROLLBAR
+				imgui.WINDOW_FLAGS.HORIZONTAL_SCROLLBAR
 			)
 		then
 			local logList = LogService:GetLogHistory()

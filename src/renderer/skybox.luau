@@ -24,8 +24,9 @@ void main()
     // Fetch color from texture map
     vec3 color = vec3(0.0);
 
-    if (vflipped) color = texture(environmentMap, vec3(fragPosition.x, -fragPosition.y, fragPosition.z)).rgb;
-    else color = texture(environmentMap, fragPosition).rgb;
+    // use textureLod instead of texture here and disable mipmapping to prevent seams (0.0 as the 3rd arg disables mipmapping).
+    if (vflipped) color = textureLod(environmentMap, vec3(fragPosition.x, -fragPosition.y, fragPosition.z), 0.0).rgb;
+    else color = textureLod(environmentMap, fragPosition, 0.0).rgb;
 
     if (doGamma)// Apply gamma correction
     {

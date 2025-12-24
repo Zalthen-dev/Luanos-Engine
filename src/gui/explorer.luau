@@ -42,16 +42,16 @@ self = window.Create(function()
 	end
 
 	local function TreeRender(obj)
-		local flags = bit32.bor(imgui.IMGUI_TREENODEFLAGS_OPENONDOUBLECLICK, imgui.IMGUI_TREENODEFLAGS_OPENONARROW, imgui.IMGUI_TREENODEFLAGS_SPANFULLWIDTH)
+		local flags = bit32.bor(imgui.TREE_NODE_FLAGS.OPENONDOUBLECLICK, imgui.TREE_NODE_FLAGS.OPENONARROW, imgui.TREE_NODE_FLAGS.SPANFULLWIDTH)
 
 		local children = obj:GetChildren()
 		if #children == 0 then
-			flags = bit32.bor(flags, imgui.IMGUI_TREENODEFLAGS_LEAF)
+			flags = bit32.bor(flags, imgui.TREE_NODE_FLAGS.LEAF)
 		end
 
 		local isSelected = Selection:_IsSelected(obj)
 		if isSelected then
-			flags = bit32.bor(flags, imgui.IMGUI_TREENODEFLAGS_SELECTED)
+			flags = bit32.bor(flags, imgui.TREE_NODE_FLAGS.SELECTED)
 		end
 
 		if imgui.SmallButton("+##" .. obj.ClassName .. obj.UniqueId) == 1 then
@@ -120,7 +120,7 @@ self = window.Create(function()
 		end
 	end
 
-	if imgui.Begin("Explorer", self.visible, imgui.IMGUI_WINDOWFLAGS_HORIZONTAL_SCROLLBAR) == 1 then
+	if imgui.Begin("Explorer", self.visible, imgui.WINDOW_FLAGS.HORIZONTAL_SCROLLBAR) == 1 then
 		for _, serv in ipairs(GetServices()) do
 			TreeRender(serv)
 		end

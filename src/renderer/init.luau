@@ -194,6 +194,8 @@ end
 
 function renderer.UpdateFreecam(camera: rl.Camera3D, delta: number)
 	if not renderer.ViewportActive then
+		camera_rotatingCamera = false
+		camera_warpingThisFrame = false
 		return
 	end
 
@@ -386,7 +388,6 @@ function renderer.RenderScene()
 		rl.ClearBackground(rl.BLACK)
 
 		imgui.rImGuiBegin()
-		renderer.Render3DScene()
 		gui.Draw()
 
 		imgui.rImGuiEnd()

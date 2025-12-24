@@ -28,7 +28,19 @@ gui._dockBuilt = false
 gui.dockid = nil
 gui.viewport = nil
 
-local windows = {enginesettings, explorer, output, properties, toolbox, viewport}
+local windows = {
+	enginesettings, 
+	explorer, 
+	output, 
+	properties, 
+	toolbox, 
+	viewport
+}
+
+explorer.title = "Explorer"
+output.title = "Output"
+properties.title = "Properties"
+toolbox.title = "Toolbox"
 
 function gui.Draw()
 	gui.dockid = imgui.GetID("GuiDockspace")
@@ -78,7 +90,13 @@ function gui.Draw()
 
 			imgui.EndMenu()
 		end
-
+		if imgui.BeginMenu("View") == 1 then
+			for _, window in windows do
+				if window.title == "" then continue end
+				imgui.Checkbox(window.title, window.visible)
+			end
+			imgui.EndMenu()
+		end
 		imgui.EndMainMenuBar()
 	end
 
