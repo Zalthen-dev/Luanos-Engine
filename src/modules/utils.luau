@@ -70,4 +70,9 @@ function utils.ptrFromStructFieldPtr(structPtr: FFIPointer, fieldOff: number): F
 	return utils.ptrFromU64(utils.ReadPtr64FromPtr(structPtr, fieldOff))
 end
 
+
+function utils.isFinite(value: number)
+	return (value == value) and (math.abs(value) < math.huge)
+end
+
 return utils

@@ -310,6 +310,7 @@ function renderer.Render3DScene()
 				continue
 			end
 			
+			if not utils.isFinite(part.Transparency) then continue end
 			if part.Transparency >= 1 then continue end
 			if part.Size.Magnitude <= 1e-6 then continue end
 

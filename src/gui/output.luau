@@ -10,14 +10,12 @@ self = window.Create(function()
 
 	if imgui.Begin("Output", self.visible) == 1 then
 		local availSize = imgui.FromImVec2(imgui.GetContentRegionAvail())
-		if
-			imgui.BeginChild(
+		if imgui.BeginChild(
 				"OutputScrolling",
 				imgui.NewImVec2(availSize.x, availSize.y),
 				false,
-				imgui.WINDOW_FLAGS.HORIZONTAL_SCROLLBAR
-			)
-		then
+				imgui.IMGUI_WINDOWFLAGS_HORIZONTAL_SCROLLBAR
+			) then
 			local logList = LogService:GetLogHistory()
 
 			local count = #logList

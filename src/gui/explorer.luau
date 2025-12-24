@@ -42,26 +42,29 @@ self = window.Create(function()
 	end
 
 	local function TreeRender(obj)
-		local flags = bit32.bor(imgui.TREE_NODE_FLAGS.OPENONDOUBLECLICK, imgui.TREE_NODE_FLAGS.OPENONARROW, imgui.TREE_NODE_FLAGS.SPANFULLWIDTH)
+		local flags = bit32.bor(
+			imgui.IMGUI_TREENODEFLAGS_OPENONDOUBLECLICK,
+			imgui.IMGUI_TREENODEFLAGS_OPENONARROW,
+			imgui.IMGUI_TREENODEFLAGS_SPANFULLWIDTH
+		)
 
 		local children = obj:GetChildren()
 		if #children == 0 then
-			flags = bit32.bor(flags, imgui.TREE_NODE_FLAGS.LEAF)
+			flags = bit32.bor(flags, imgui.IMGUI_TREENODEFLAGS_LEAF)
 		end
 
 		local isSelected = Selection:_IsSelected(obj)
 		if isSelected then
-			flags = bit32.bor(flags, imgui.TREE_NODE_FLAGS.SELECTED)
+			flags = bit32.bor(flags, imgui.IMGUI_TREENODEFLAGS_SELECTED)
 		end
 
 		if imgui.SmallButton("+##" .. obj.ClassName .. obj.UniqueId) == 1 then
-			
 		end
 
 		imgui.SameLine()
 
 		if obj._NODE_FORCE_EXPAND then
-			imgui.SetNextItemOpen(true,0)
+			imgui.SetNextItemOpen(true, 0)
 			obj._NODE_FORCE_EXPAND = nil
 		end
 
@@ -94,13 +97,13 @@ self = window.Create(function()
 			imgui.TextDisabled("Cut")
 			imgui.TextDisabled("Copy")
 
-			if imgui.Selectable("Duplicate") == 1 then 
+			if imgui.Selectable("Duplicate") == 1 then
 				local newObj = obj:Clone()
 				newObj.Name = obj.Name
 				newObj.Parent = obj.Parent
 
 				Selection:Remove(obj)
-				Selection:Add({newObj})
+				Selection:Add({ newObj })
 			end
 
 			if imgui.Selectable("Delete") == 1 then
@@ -119,14 +122,13 @@ self = window.Create(function()
 			if imgui.Selectable("Select Parent") == 1 then
 				local parent = obj.Parent
 				if parent.ClassName ~= "DataModel" then
-					Selection:Remove({obj})
+					Selection:Remove({ obj })
 					Selection:Add(parent)
 				end
 			end
 
 			imgui.EndPopup()
 		end
-		
 
 		if nodeResult == 1 then
 			if #children > 0 then
@@ -138,7 +140,7 @@ self = window.Create(function()
 		end
 	end
 
-	if imgui.Begin("Explorer", self.visible, imgui.WINDOW_FLAGS.HORIZONTAL_SCROLLBAR) == 1 then
+	if imgui.Begin("Explorer", self.visible, imgui.IMGUI_WINDOWFLAGS_HORIZONTAL_SCROLLBAR) == 1 then
 		for _, serv in ipairs(GetServices()) do
 			TreeRender(serv)
 		end

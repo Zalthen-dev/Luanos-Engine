@@ -37,8 +37,7 @@ self = window.Create(function()
 			self.renderer().CAMERA_SCROLLSPEED = utils.ValueFromFloatPtr(self.CategoryCamera.ScrollSpeed)
 		end
 		if imgui.Checkbox("Scroll towards Cursor position", self.CategoryCamera.ScrollTowardsCursor) == 1 then
-			self.renderer().CAMERA_SCROLLTOWARDCURSOR =
-				utils.AsBool(utils.ValueFromBoolPtr(self.CategoryCamera.ScrollTowardsCursor))
+			self.renderer().CAMERA_SCROLLTOWARDCURSOR = utils.AsBool(utils.ValueFromBoolPtr(self.CategoryCamera.ScrollTowardsCursor))
 		end
 	end
 
@@ -71,14 +70,14 @@ self = window.Create(function()
 		end
 	end
 
-	imgui.SetNextWindowSize(imgui.NewImVec2(400, 400), imgui.COND.APPEARING)
+	imgui.SetNextWindowSize(imgui.NewImVec2(400, 400), imgui.IMGUI_COND_APPEARING)
 	if imgui.Begin("Luanos Engine - Settings", self.visible) == 1 then
-		if imgui.TreeNodeEx("Camera", imgui.TREE_NODE_FLAGS.DEFAULTOPEN) == 1 then
+		if imgui.TreeNodeEx("Camera", imgui.IMGUI_TREENODEFLAGS_DEFAULTOPEN) == 1 then
 			CategoryCameraOptions()
 			imgui.TreePop()
 		end
 
-		if imgui.TreeNodeEx("General", imgui.TREE_NODE_FLAGS.DEFAULTOPEN) == 1 then
+		if imgui.TreeNodeEx("General", imgui.IMGUI_TREENODEFLAGS_DEFAULTOPEN) == 1 then
 			CategoryGeneralOptions()
 			imgui.TreePop()
 		end
@@ -141,7 +140,6 @@ self.Themes = {
 }
 local defaultTheme = 1
 self.Theme = self.Themes[defaultTheme].Name
-
 
 self:SetVisibility(false)
 return self
