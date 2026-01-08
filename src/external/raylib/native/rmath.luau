@@ -33,10 +33,12 @@ end
 
 export type Fns = {
     Vector3Distance: (v1: Vector3, v2: Vector3) -> (float),
+	Vector3DistanceSqr: (v1: Vector3, v2: Vector3) -> (float),
 }
 
 return {
     defs = {
         Vector3Distance = fn(float, {Vector3, Vector3}),
+		Vector3DistanceSqr = fn(float, {Vector3, Vector3}),
     }
 }

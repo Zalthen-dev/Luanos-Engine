@@ -326,6 +326,27 @@ function renderer.Render3DScene()
 				renderer.ActuallyDrawn3D += 1
 			end
 		end
+		
+		table.sort(transparentPool, function(partGetA, partGetB)
+			local partA = partGetA()
+			local partB = partGetB()
+
+			local partAPos = vector.create(
+				partA.Position.X,
+				partA.Position.Y, 
+				partA.Position.Z 
+			)
+
+			local partBPos = vector.create(
+				partB.Position.X,
+				partB.Position.Y, 
+				partB.Position.Z 
+			)
+
+			local partDistA = vector.magnitude(partAPos - camera_position)--rl.Vector3DistanceSqr(camera_position, partAPos)
+			local partDistB = vector.magnitude(partBPos - camera_position)--rl.Vector3DistanceSqr(camera_position, partBPos)
+			return partDistA > partDistB
+		end)
 
 		-- all the checks have been done already, just draw them
 		for _, partGet in transparentPool do

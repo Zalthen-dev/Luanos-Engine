@@ -17,6 +17,15 @@ center.Position = originPos
 center.Transparency = 0.5
 center.Parent = workspace
 
+local center2 = Instance.new("Part")
+center2.Color = Color3.new(0, 0, 0)
+center2.Shape = "Sphere"
+center2.Size = Vector3.new(50, 50, 50)
+center2.Name = "Center"
+center2.Position = originPos + Vector3.new(50, 0, 0)
+center2.Transparency = 0.5
+center2.Parent = workspace
+
 local parts = 500
 local mpos = 1000
 for i = 1, parts do
