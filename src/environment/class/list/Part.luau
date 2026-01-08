@@ -4,7 +4,7 @@ local BrickColor = require("@BrickColor")
 local CFrame = require("@CFrame")
 local Enum = require("@Enum")
 
-local propTable = {
+local properties = {
 	Position = Vector3.new(0, 0.5, 0),
 	Size = Vector3.new(4, 1, 2),
 	Color = Color3.fromRGB(163, 162, 165),
@@ -30,12 +30,12 @@ local propTable = {
 return {
 	class = "Part",
 	callback = function(instance)
-		instance:SetProperties(propTable)
+		instance:SetProperties(properties)
 		return instance
 	end,
 	
 	inherit = function(tble)
-		for prop, val in pairs(propTable) do
+		for prop, val in pairs(properties) do
 			tble[prop] = val
 		end
 	end,

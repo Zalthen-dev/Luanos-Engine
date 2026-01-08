@@ -1,6 +1,6 @@
 local Enum = require("@Enum")
 
-local propTable = {
+local properties = {
     Name = "Script",
     Disabled = false,
     Enabled = true,
@@ -11,12 +11,12 @@ local propTable = {
 return {
     class = "Script",
     callback = function(instance)
-		instance:SetProperties(propTable)
+		instance:SetProperties(properties)
 		return instance
 	end,
 	
 	inherit = function(tble)
-		for prop, val in pairs(propTable) do
+		for prop, val in pairs(properties) do
 			tble[prop] = val
 		end
 	end,

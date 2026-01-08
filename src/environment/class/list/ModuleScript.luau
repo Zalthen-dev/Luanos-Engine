@@ -1,4 +1,4 @@
-local propTable = {
+local properties = {
     Name = "ModuleScript",
     Source = [[print("Hello World!")]]
 }
@@ -6,12 +6,12 @@ local propTable = {
 return {
     class = "ModuleScript",
     callback = function(instance)
-		instance:SetProperties(propTable)
+		instance:SetProperties(properties)
 		return instance
 	end,
 	
 	inherit = function(tble)
-		for prop, val in pairs(propTable) do
+		for prop, val in pairs(properties) do
 			tble[prop] = val
 		end
 	end,

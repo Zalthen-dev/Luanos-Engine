@@ -1,5 +1,5 @@
 [workspace.scripts]
-game = "src/main.luau"
+engine = "src/main.luau"
 
 [runtime.debug]
 detailed_error = true
