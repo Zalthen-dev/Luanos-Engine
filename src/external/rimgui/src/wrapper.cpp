@@ -281,6 +281,15 @@ extern "C" {
         return ImGui::BeginPopupContextWindow();
     }
 
+    bool OpenPopup(const char* str_id, int flags) {
+        ImGui::OpenPopup(str_id, flags);
+        return true;
+    }
+
+    bool BeginPopup(const char* str_id, int flags) {
+        return ImGui::BeginPopup(str_id, flags);
+    }
+
     bool BeginPopupContextItem() {
         return ImGui::BeginPopupContextItem();
     }

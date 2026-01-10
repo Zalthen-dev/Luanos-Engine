@@ -3,6 +3,10 @@ local window = require("@window")
 local rl = require("@raylib")
 
 local registry = require("@registry")
+local instance_List = registry.getNameList()
+
+local insert_Target = nil
+local open_InsertMenu = false
 
 local services = {
 	"Workspace",
@@ -59,8 +63,10 @@ self = window.Create(function()
 		end
 
 		if imgui.SmallButton("+##" .. obj.ClassName .. obj.UniqueId) == 1 then
+			insert_Target = obj
+			open_InsertMenu = true
 		end
-
+		
 		imgui.SameLine()
 
 		if obj._NODE_FORCE_EXPAND then
@@ -141,8 +147,30 @@ self = window.Create(function()
 	end
 
 	if imgui.Begin("Explorer", self.visible, imgui.IMGUI_WINDOWFLAGS_HORIZONTAL_SCROLLBAR) == 1 then
+		open_InsertMenu = false
 		for _, serv in ipairs(GetServices()) do
 			TreeRender(serv)
+		end
+		if open_InsertMenu then
+			-- for some reason putting openpopup in the + button causes it to break when calling it from descendants (tried with ###InsertMenu)
+			imgui.OpenPopup("InsertMenu")
+			open_InsertMenu = false
+		end
+		-- lo and behold: the insert menu.
+		if imgui.BeginPopup("InsertMenu") == 1 then
+			if insert_Target then
+				for _, className in ipairs(instance_List) do
+					if imgui.Selectable(className) == 1 then
+						local newObj = engineState.Instance.new(className)
+						newObj.Name = className
+						newObj.Parent = insert_Target
+						Selection:Remove({insert_Target})
+						Selection:Add(newObj)
+						insert_Target._NODE_FORCE_EXPAND = true
+					end
+				end
+			end
+			imgui.EndPopup()
 		end
 	end
 	imgui.End()
