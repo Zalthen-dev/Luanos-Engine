@@ -410,6 +410,7 @@ function renderer.OnEnd()
 	print("Unloading ImGui")
 	imgui.rImGuiDisableDocking()
 	imgui.rImGuiShutdown()
+	
 	Mesh.Unload()
 	Skybox.Unload()
 end

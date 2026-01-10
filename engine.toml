@@ -1,9 +1,9 @@
 # Engine configuration options
 
 [window]
-fps = 360
+fps = 120
 fps_unfocused = 20
 reduce_fps_on_unfocus = true
 
 [engine]
-default_theme = "Visual Studio Dark Blue"
+default_theme = "ImGui Dark"
