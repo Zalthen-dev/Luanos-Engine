@@ -1,0 +1,18 @@
+local Color3 = require("@Color3")
+
+local properties = {
+	Value = Color3.new(1, 1, 1)
+}
+
+return {
+	class = "Color3Value",
+	callback = function(instance)
+		instance:SetProperties(properties)
+		return instance
+	end,
+	inherit = function(tble)
+		for prop, val in pairs(properties) do
+			tble[prop] = val
+		end
+	end,
+}

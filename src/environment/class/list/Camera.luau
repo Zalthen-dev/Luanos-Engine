@@ -24,7 +24,7 @@ local properties = {
 }
 
 return {
-	class = "Folder",
+	class = "Camera",
 	callback = function(instance)
 		instance:SetProperties(properties)
 		return instance

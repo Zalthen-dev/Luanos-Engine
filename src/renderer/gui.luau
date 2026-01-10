@@ -28,6 +28,7 @@ gui._dockBuilt = false
 gui.dockid = nil
 gui.viewport = nil
 
+local scriptEditorWindows = {}
 local windows = {
 	enginesettings,
 	explorer,
