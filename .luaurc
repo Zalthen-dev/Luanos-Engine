@@ -12,6 +12,7 @@
         "rayutils": "./src/modules/rayutils",
         "window": "./src/modules/window",
         "editor": "./src/modules/editor",
+        "colortexteditor": "./src/modules/colortexteditor",
 
         "assets": "./src/assets",
         

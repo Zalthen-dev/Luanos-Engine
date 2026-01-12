@@ -1,5 +1,6 @@
 local imgui = require("@rimgui")
 local window = require("@window")
+local textEditor = require("@editor")
 
 local node_flags = bit32.bor(
 	imgui.IMGUI_TREENODEFLAGS_OPENONDOUBLECLICK,
@@ -14,6 +15,8 @@ local boolPtr = ffi.alloc(1)
 local numPtr = ffi.alloc(4)
 local vector3Ptr = ffi.alloc(12)
 local vector2Ptr = ffi.alloc(8)
+local stringEditor = textEditor.new()
+local stringEditorSize = imgui.NewImVec2(0, 0) -- i think this only matters if the editor's multiline.
 
 local function TextCenter(text)
 	local availRegion = imgui.FromImVec2(imgui.GetWindowSize())
@@ -42,11 +45,30 @@ local function PropertiesObject(obj)
 		if k == "Children" then continue end
 
 		local readOnly = false
+		local isService = false
+		
+		if t.Parent and t.Parent.Name == "game" then
+			isService = true
+		end
+
+		if k == "Name" and isService then
+			readOnly = true
+		end
 
 		if k == "ClassName" then
 			readOnly = true
 		end
 
+		if k == "Source" then
+			readOnly = true
+		    local str = string.sub(v, 1, 32)
+			if #v > 32 then
+				str = str .. "..."
+			end
+			imgui.Text(string.format("Source: %s", str))
+			continue
+		end
+		
 		if k == "Parent" then
 			v = v.Name
 		end
@@ -64,7 +86,6 @@ local function PropertiesObject(obj)
         elseif vType == "number" then
             numPtr:writef32(0, v)
             if imgui.InputFloat(k, numPtr, 0, 0, "%.4f", 0) == 1 and not readOnly then
-                print(numPtr:readf32(0))
                 t[k] = numPtr:readf32(0)
             end
 		elseif vType == "Vector2" then
@@ -164,7 +185,17 @@ local function PropertiesObject(obj)
 				end
 				imgui.TreePop()
 			end
-        else
+        elseif vType == "string" then
+			-- i do obj[k] here instead of t[k] cause changes dont reflect in the explorer otherwise
+			-- (the string in _props differs from the one in the object).
+			-- u know more about how instances are supposed to be so ur prob now ;0
+			stringEditor:setText(obj[k])
+			-- without the unique id, if u edit the property and click on another instance without saving first, it will get applied to that instead.
+			stringEditor:draw(k.."##"..tostring(obj), stringEditorSize, readOnly and imgui.IMGUI_INPUTTEXTFLAGS_READONLY or 0)
+			if not readOnly and imgui.IsItemDeactivatedAfterEdit() == 1 then
+				obj[k] = stringEditor:getText()
+			end
+		else
             -- TODO: add more editable properties
 		    imgui.Text(("%s: %s"):format(k, tostring(v)))
 		end
