@@ -1,4 +1,7 @@
 local ffi = zune.ffi
+local mem = zune.mem
+
+type float = number
 
 local utils = {}
 local U32 = 4294967296
@@ -27,8 +30,8 @@ function utils.FloatPtr(value: number): FFIPointer
 	return ptr
 end
 
-function utils.SetFloatPtr(ptr: FFIPointer, value: float)
-	ptr:writef32(value)
+function utils.SetFloatPtr(ptr: FFIPointer, value: float, offset: number?)
+	ptr:writef32(offset or 0, value)
 end
 
 function utils.ValueFromFloatPtr(ptr: FFIPointer): float
@@ -39,6 +42,21 @@ function utils.IntPtr(value: number): FFIPointer
 	local ptr = ffi.create(ffi.types.i32)
 	ptr:writei32(0, value)
 	return ptr
+end
+
+function utils.readstring(ptr: FFIPointer)
+    local len = mem.len(ptr)
+    local raw_buffer = zune.mem.slice(ptr, 0, len)
+    return buffer.tostring(raw_buffer)
+end
+
+function utils.writestring(ptr: FFIPointer, str)
+    local ptr_capacity = mem.len(ptr)
+    local str_len = #str
+    local copy_len = math.min(str_len, ptr_capacity - 1)
+    local scratch_buf = buffer.fromstring(str)
+    mem.copy(ptr, 0, scratch_buf, 0, copy_len)
+    ptr:writeu8(copy_len, 0)
 end
 
 function utils.ReadPtr64FromBuffer(buf: buffer, off: number): number

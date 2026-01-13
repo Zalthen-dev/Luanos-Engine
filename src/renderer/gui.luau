@@ -3,6 +3,7 @@ local imgui = require("@rimgui")
 local utils = require("@utils")
 
 local enginesettings = require("../gui/enginesettings")
+local scripteditor = require("../gui/scripteditor")
 local explorer = require("../gui/explorer")
 local output = require("../gui/output")
 local properties = require("../gui/properties")
@@ -29,12 +30,13 @@ gui.dockid = nil
 gui.viewport = nil
 
 local windows = {
-	enginesettings,
-	explorer,
-	output,
-	properties,
-	toolbox,
-	viewport,
+	scripteditor,
+	enginesettings, 
+	explorer, 
+	output, 
+	properties, 
+	toolbox, 
+	viewport
 }
 
 local setStartupTheme = false

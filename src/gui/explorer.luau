@@ -1,5 +1,6 @@
 local imgui = require("@rimgui")
 local window = require("@window")
+local scriptEditor = require("./scripteditor")
 local rl = require("@raylib")
 
 local registry = require("@registry")
@@ -74,8 +75,9 @@ self = window.Create(function()
 
 		-- ImGui doesnt permit us to have two objects with the same name
 		-- so using the UniqueId should fix this
-		local nodeName = obj.Name .. "##" .. obj.UniqueId
+		local nodeName = obj.Name .. "##" .. tostring(obj)
 		local nodeResult = imgui.TreeNodeEx(nodeName, flags)
+		
 		if imgui.IsItemClicked() == 1 then
 			if Selection:_IsSelected(obj) then
 				if rl.IsKeyDown(rl.KEY_LEFT_SHIFT) == 1 then
@@ -89,6 +91,13 @@ self = window.Create(function()
 				else
 					Selection:Set({ obj })
 				end
+			end
+		end
+
+		if imgui.IsItemHovered() == 1 and imgui.IsMouseDoubleClicked(0) == 1 then
+			-- open/rename
+			if obj.Source then
+				scriptEditor:Open(obj)
 			end
 		end
 

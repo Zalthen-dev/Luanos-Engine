@@ -435,28 +435,28 @@ extern "C" {
     // TODO: make it more customizable
     // like making it not only multi-line, and additional things
 
-    TextEditor* TextEditorCreate(int initialSize) {
+    CustomTextEditor* TextEditorCreate(int initialSize) {
         size_t initial_capacity = initialSize;
         return TextEditor_Create(initial_capacity);
     }
 
-    void TextEditorDraw(TextEditor* textEditor, const char* label, ImVec2_FFI size, int flags) {
+    void TextEditorDraw(CustomTextEditor* textEditor, const char* label, ImVec2_FFI size, int flags) {
         TextEditor_Draw(textEditor, label, ImVec2(size.x, size.y), flags);
     }
 
-    int TextEditorGetLength(TextEditor* textEditor) {
+    int TextEditorGetLength(CustomTextEditor* textEditor) {
         return TextEditor_GetLength(textEditor);
     }
 
-    const char* TextEditorGetText(TextEditor* textEditor) {
+    const char* TextEditorGetText(CustomTextEditor* textEditor) {
         return TextEditor_GetText(textEditor);
     }
 
-    void TextEditorSetText(TextEditor* textEditor, const char* text) {
+    void TextEditorSetText(CustomTextEditor* textEditor, const char* text) {
         TextEditor_SetText(textEditor, text);
     }
 
-    void TextEditorDestroy(TextEditor* textEditor) {
+    void TextEditorDestroy(CustomTextEditor* textEditor) {
         TextEditor_Destroy(textEditor);
     }
 
