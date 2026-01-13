@@ -27,7 +27,7 @@ center2.Transparency = 0.5
 center2.Parent = workspace
 
 print("Hello")
-warn("Hello")
+warn("Warning aah!!")
 
 local parts = 500
 local mpos = 1000
@@ -52,5 +52,3 @@ for i = 1, parts do
 		)
 	end)
 end
-
-error("Hello")
