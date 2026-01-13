@@ -13,7 +13,7 @@
 
 Compile with below line
 
-g++ -shared -fPIC wrapper.cpp rlImGui/rlImGui.cpp imgui/imgui.cpp imgui/imgui_draw.cpp imgui/imgui_widgets.cpp imgui/imgui_tables.cpp imgui/imgui_demo.cpp texteditor/texteditor.h texteditor/texteditor.cpp -I. -Iimgui -IrlImGui -Iraylib/src -lraylib -o librimgui.so
+g++ -shared -fPIC wrapper.cpp rlImGui/rlImGui.cpp imgui/imgui.cpp imgui/imgui_draw.cpp imgui/imgui_widgets.cpp imgui/imgui_tables.cpp imgui/imgui_demo.cpp texteditor/texteditor.h texteditor/texteditor.cpp colortexteditor/*.cpp -I. -Iimgui -IrlImGui -Iraylib/src -lraylib -o librimgui.so
 
 */
 

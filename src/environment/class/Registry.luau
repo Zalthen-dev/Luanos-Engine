@@ -2,6 +2,8 @@ local filesystem = require("../../modules/filesystem")
 local sandboxer = require("../../modules/sandboxer")
 local Instance = require("./Instance")
 
+local fs = zune.fs
+
 local registry = {}
 local listOfClasses = {}
 

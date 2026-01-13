@@ -20,7 +20,7 @@ return function()
         CameraSpeed = 25,
         MouseSensitivity = 1,
 
-        MaxFPS = 360,
+        MaxFPS = 120,
         ReduceFpsWhenUnfocus = true,
     }
 

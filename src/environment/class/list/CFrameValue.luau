@@ -1,7 +1,7 @@
 local CFrame = require("@CFrame")
 
 local properties = {
-	Value = CFrame.new()
+	Value = CFrame.new(0, 0, 0)
 }
 
 return {
