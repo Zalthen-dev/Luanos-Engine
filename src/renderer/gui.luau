@@ -3,11 +3,14 @@ local imgui = require("@rimgui")
 local utils = require("@utils")
 
 local enginesettings = require("../gui/enginesettings")
+local gizmo = require("../gui/gizmo")
 local scripteditor = require("../gui/scripteditor")
 local explorer = require("../gui/explorer")
 local output = require("../gui/output")
 local properties = require("../gui/properties")
 local toolbox = require("../gui/toolbox")
+local toolbar = require("../gui/toolbar")
+local statusbar = require("../gui/statusbar")
 local viewport = require("../gui/viewport")
 
 local ffi = zune.ffi
@@ -22,21 +25,26 @@ local function DockSplit(node_id: number, dir: number, ratio: number): (number, 
 end
 
 local gui = {}
+
+gui.rounding = 4
 gui.renderer = nil
 
-gui.dockFlags = 0
+gui.dockFlags = bit32.bor(imgui.IMGUI_DOCKNODEFLAGS_NO_CLOSE_BUTTON)
 gui._dockBuilt = false
 gui.dockid = nil
 gui.viewport = nil
 
 local windows = {
+	toolbar,
+	statusbar,
 	scripteditor,
 	enginesettings, 
 	explorer, 
 	output, 
 	properties, 
 	toolbox, 
-	viewport
+	viewport,
+	gizmo,
 }
 
 local setStartupTheme = false
@@ -72,7 +80,7 @@ function gui.Draw()
 		imgui.DockBuilderFinish(gui.dockid)
 		gui._dockBuilt = true
 	end
-
+	
 	if not setStartupTheme then
 		local engineState = gui.renderer().EngineState
 		local config = engineState.config
@@ -86,7 +94,7 @@ function gui.Draw()
 					break
 				end
 			end
-
+			
 			if defaultThemeData then
 				enginesettings.Theme = defaultThemeData.Name
 				defaultThemeData.Function()
@@ -98,7 +106,9 @@ function gui.Draw()
 		setStartupTheme = true
 	end
 
+	imgui.PushStyleVarFloat(imgui.StyleVar.DockingSeparatorSize,0)
 	imgui.DockSpaceOverViewport(gui.dockid, gui.viewport, gui.dockFlags)
+	imgui.PopStyleVar()
 	if imgui.BeginMainMenuBar() == 1 then
 		if imgui.BeginMenu("File") == 1 then
 			imgui.MenuItem("New", "Ctrl+N")
@@ -117,7 +127,7 @@ function gui.Draw()
 		end
 		if imgui.BeginMenu("View") == 1 then
 			for _, window in windows do
-				if window.title == "" then
+				if not window.title or window.title == "" or window.title == "Settings" then
 					continue
 				end
 				imgui.Checkbox(window.title, window.visible)
@@ -131,15 +141,20 @@ function gui.Draw()
 		enginesettings:SetVisibility(not enginesettings:GetVisibility())
 	end
 
+	imgui.PushStyleVarFloat(imgui.StyleVar.WindowRounding, gui.rounding)
+	imgui.PushStyleVarFloat(imgui.StyleVar.FrameRounding, gui.rounding)
+	imgui.PushStyleVarFloat(imgui.StyleVar.PopupRounding, gui.rounding)
+	imgui.PushStyleVarFloat(imgui.StyleVar.ChildRounding, gui.rounding)
+	imgui.PushStyleVarFloat(imgui.StyleVar.WindowBorderSize, 0)
 	for _, window in windows do
 		if not window.renderer then
 			window.renderer = function()
 				return gui.renderer()
 			end
 		end
-
 		window:Draw()
 	end
+	imgui.PopStyleVar(5)
 end
 
 return gui

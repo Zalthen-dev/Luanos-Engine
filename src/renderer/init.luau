@@ -13,7 +13,20 @@ local ffi = zune.ffi
 local task = zune.task
 local mem = zune.mem
 
+local EulerToAxisAngle = rayutils.EulerToAxisAngle
+local Color3ToRaylib = rayutils.Color3ToRaylib
+
 local renderer = {}
+
+-- pre-create these just in case
+renderer.ViewportPosition = {
+	X = 0,
+	Y = 0,
+}
+renderer.ViewportSize = {
+	X = 0,
+	Y = 0,
+}
 
 renderer.CAMERA_SPEED = 5
 renderer.CAMERA_PANSPEED = 1
@@ -28,6 +41,7 @@ local worldUp = vector.create(0, 1, 0)
 renderer.EngineState = nil
 
 renderer.MainSignal = Signal.new()
+renderer.Wireframes = {}
 renderer.RenderPool3D = {}
 renderer.RenderPool2D = {}
 
@@ -123,75 +137,6 @@ local camera = rl.Camera3D:new({
 	projection = rl.CAMERA_PERSPECTIVE,
 })
 
-local function MakeMatrix(position, rotation, scale): rl.Matrix
-    scale = scale or { x = 1, y = 1, z = 1 }
-
-    local px, py, pz = position.x, position.y, position.z
-    local rx, ry, rz = rotation.x, rotation.y, rotation.z
-    local sx, sy, sz = scale.x, scale.y, scale.z
-
-    local cx, sxr = math.cos(rx), math.sin(rx)
-    local cy, syr = math.cos(ry), math.sin(ry)
-    local cz, szr = math.cos(rz), math.sin(rz)
-
-    -- Rotation matrix (Rz * Ry * Rx)
-    local r00 =  cy * cz
-    local r01 =  cy * szr
-    local r02 = -syr
-
-    local r10 = sxr * syr * cz - cx * szr
-    local r11 = sxr * syr * szr + cx * cz
-    local r12 = sxr * cy
-
-    local r20 = cx * syr * cz + sxr * szr
-    local r21 = cx * syr * szr - sxr * cz
-    local r22 = cx * cy
-
-    -- Apply scale
-    r00 *= sx; r01 *= sx; r02 *= sx
-    r10 *= sy; r11 *= sy; r12 *= sy
-    r20 *= sz; r21 *= sz; r22 *= sz
-
-    -- Build Raylib Matrix (column-major, interleaved)
-    return rl.Matrix:new({
-        m0  = r00, m4  = r01, m8  = r02, m12 = px,
-        m1  = r10, m5  = r11, m9  = r12, m13 = py,
-        m2  = r20, m6  = r21, m10 = r22, m14 = pz,
-        m3  = 0,   m7  = 0,   m11 = 0,   m15 = 1
-    })
-end
-
-local function EulerToAxisAngleRad(euler: Vector3): (vector, number)
-	local cx, sx = math.cos(euler.X / 2), math.sin(euler.X / 2)
-	local cy, sy = math.cos(euler.Y / 2), math.sin(euler.Y / 2)
-	local cz, sz = math.cos(euler.Z / 2), math.sin(euler.Z / 2)
-
-	-- Quaternion multiplication: q = qz * qy * qx
-	local qw = cz * cy * cx + sz * sy * sx
-	local qx = cz * cy * sx - sz * sy * cx
-	local qy = cz * sy * cx + sz * cy * sx
-	local qz = sz * cy * cx - cz * sy * sx
-
-	local angle = 2 * math.acos(math.clamp(qw, -1, 1))
-	local s = math.sqrt(1 - qw * qw)
-	if s < 0.0001 then
-		-- If s is near zero, axis direction is arbitrary
-		return vector.create(1, 0, 0), 0
-	else
-		return vector.create(qx / s, qy / s, qz / s), angle
-	end
-end
-
-local function Color3ToRaylib(c, transparency)
-	local r, g, b = c:ToRGB()
-	return rl.Color:new({
-		r = r,
-		g = g,
-		b = b,
-		a = math.floor(255 * (1 - transparency)),
-	})
-end
-
 function renderer.UpdateFreecam(camera: rl.Camera3D, delta: number)
 	if not renderer.ViewportActive then
 		camera_rotatingCamera = false
@@ -268,13 +213,14 @@ function renderer.UpdateFreecam(camera: rl.Camera3D, delta: number)
 end
 
 function renderer.DrawModel(model, part)
-	local axis, angle = EulerToAxisAngleRad(part.Rotation)
-
+	local axis, angle = EulerToAxisAngle(part.Rotation)
 	local position = vector.create(part.Position.X, part.Position.Y, part.Position.Z)
 	local scale = vector.create(part.Size.X, part.Size.Y, part.Size.Z)
 	local tint = Color3ToRaylib(part.Color, part.Transparency)
-
 	rl.DrawModelEx(model, position, axis, angle, scale, tint)
+	if renderer.Wireframes[part] then
+		rl.DrawModelWiresEx(model, position, axis, angle, scale, rl.SKYBLUE)
+	end
 end
 
 local function DrawPart(part)
@@ -298,6 +244,7 @@ function renderer.AddToRenderPool2D(data)
 end
 
 function renderer.Render3DScene()
+	renderer.Camera = camera
 	renderer.UpdateFreecam(camera, rl.GetFrameTime())
 	renderer.ActuallyDrawn3D = 0
 	do rl.BeginMode3D(camera)
@@ -317,13 +264,15 @@ function renderer.Render3DScene()
 			if part.Size.Magnitude <= 1e-6 then continue end
 
 			if ShouldDrawPart(part, camera, camera_position, camera_target, camera_fovy) then
+				part._Culled = false
 				if part.Transparency > 0 then
 					table.insert(transparentPool, partGet)
 					continue
 				end
-
 				DrawPart(part)
 				renderer.ActuallyDrawn3D += 1
+			else
+				part._Culled = true
 			end
 		end
 		
@@ -354,6 +303,7 @@ function renderer.Render3DScene()
 			DrawPart(part)
 			renderer.ActuallyDrawn3D += 1
 		end
+
 	end; rl.EndMode3D()
 
 	DrawTextOutlined(tostring(rl.GetFPS()) .. " FPS", 10, 10, 20, rl.GREEN, 2, rl.BLACK)

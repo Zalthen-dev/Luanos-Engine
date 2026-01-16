@@ -301,6 +301,7 @@ return {
 	GetMasterVolume = lib.GetMasterVolume,
 	GetMeshBoundingBox = lib.GetMeshBoundingBox,
 	GetModelBoundingBox = lib.GetModelBoundingBox,
+	rlSetLineWidth = lib.rlSetLineWidth,
 	GetMonitorCount = lib.GetMonitorCount,
 	GetMonitorHeight = lib.GetMonitorHeight,
 	GetMonitorName = lib.GetMonitorName,

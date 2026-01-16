@@ -83,6 +83,7 @@ export type Fns = {
     IsModelValid: (model: Model) -> bool,
     UnloadModel: (model: Model) -> (),
     GetModelBoundingBox: (model: Model) -> BoundingBox,
+    rlSetLineWidth: (width: float) -> (),
     DrawModel: (model: Model, position: Vector3, scale: float, tint: Color) -> (),
     DrawModelEx: (model: Model, position: Vector3, rotationAxis: Vector3, rotationAngle: float, scale: Vector3, tint: Color) -> (),
     DrawModelWires: (model: Model, position: Vector3, scale: float, tint: Color) -> (),
@@ -190,6 +191,8 @@ return {
         UnloadModel = fn(void, { Model }),
         -- BoundingBox GetModelBoundingBox(Model model);
         GetModelBoundingBox = fn(BoundingBox, { Model }),
+        -- void rlSetLineWidth: (width: float);
+        rlSetLineWidth = fn(void, {float}),
         -- void DrawModel(Model model, Vector3 position, float scale, Color tint);
         DrawModel = fn(void, { Model, Vector3, float, Color }),
         -- void DrawModelEx(Model model, Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scale, Color tint);

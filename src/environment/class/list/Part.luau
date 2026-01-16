@@ -20,6 +20,7 @@ local properties = {
 	CastsShadow = true,
 	Reflectance = 0,
 	Locked = false,
+	_Culled = false,
 	Orientation = Vector3.new(0, 0, 0),
 	Rotation = Vector3.new(0, 0, 0),
 	CFrame = CFrame.new(0, 0.5, 0),

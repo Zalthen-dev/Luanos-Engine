@@ -2,46 +2,46 @@ local imgui = require("@rimgui")
 local window = require("@window")
 
 local Enum = require("@Enum")
-
+local max_Logs = 500
+local childSize = imgui.NewImVec2(-1, -1)
 local self = {}
 self = window.Create(function()
+
 	local engineState = self.renderer().EngineState
-	local game = engineState.game
+    if not self.game then
+        self.game = engineState.game
+    end
+    if not self.LogService then
+        self.LogService = self.game:GetService("LogService")
+    end
+	
+	if imgui.Begin("Output", self.visible, imgui.IMGUI_WINDOWFLAGS_MENU_BAR) == 1 then
+		local logList = self.LogService._Logs
+		local count = #logList
+		local startIndex = (math.max(1,count - max_Logs))
+		
+		-- Menu bar
+		imgui.BeginMenuBar()
+		imgui.Text(tostring(count))
+		if imgui.Button("Clear") == 1 then
+			table.clear(logList)
+		end
+		imgui.EndMenuBar()
 
-	local LogService = game:GetService("LogService")
-
-	if imgui.Begin("Output", self.visible) == 1 then
-		local availSize = imgui.FromImVec2(imgui.GetContentRegionAvail())
 		if imgui.BeginChild(
 				"OutputScrolling",
-				imgui.NewImVec2(availSize.x, availSize.y),
+				childSize,
 				false,
-				imgui.IMGUI_WINDOWFLAGS_HORIZONTAL_SCROLLBAR
-			) then
-			local logList = LogService:GetLogHistory()
+				imgui.IMGUI_WINDOWFLAGS_ALWAYS_VERTICAL_SCROLLBAR
+			) == 1 then
 
-			local count = #logList
-			for i, log in logList do
-				if i >= (count - 5000) then
+			for i=startIndex, count do
+				local log = logList[i]
+				if log then
 					local text = ("[ %010i ]: %s"):format(log.timestamp, log.message)
-					
-					local pushedColor = false
-					if log.messageType == Enum.MessageType.MessageInfo then
-						imgui.PushStyleColor(imgui.IMGUI_COL_TEXT, imgui.NewImVec4(0, 0, 1, 1))
-						pushedColor = true
-					elseif log.messageType == Enum.MessageType.MessageWarning then
-						imgui.PushStyleColor(imgui.IMGUI_COL_TEXT, imgui.NewImVec4(1, 1, 0, 1))
-						pushedColor = true
-					elseif log.messageType == Enum.MessageType.MessageError then
-						imgui.PushStyleColor(imgui.IMGUI_COL_TEXT, imgui.NewImVec4(1, 0, 0, 1))
-						pushedColor = true
-					end
-
-					imgui.TextUnformatted(text)
-
-					if pushedColor then
-						imgui.PopStyleColor()
-					end
+					imgui.PushStyleColor(0, log.color)
+					imgui.TextWrapped(text)
+					imgui.PopStyleColor()
 				end
 			end
 

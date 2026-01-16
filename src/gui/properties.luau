@@ -1,5 +1,8 @@
 local imgui = require("@rimgui")
 local window = require("@window")
+local Vector3 = require("@Vector3")
+local Color3 = require("@Color3")
+local Vector2 = require("@Vector2")
 local textEditor = require("@editor")
 
 local node_flags = bit32.bor(
@@ -93,14 +96,20 @@ local function PropertiesObject(obj)
 				vector2Ptr:writef32(0, v.X)
 				vector2Ptr:writef32(4, v.Y)
 
+				local changed = false
 				if imgui.DragFloat("X##" .. k, vector2Ptr:offset(0), 0.05, 0.0, 0.0, "%.4f", 0) == 1 and not readOnly then
-					t[k].X = vector2Ptr:readf32(0)
+					changed = true
 				end
 
 				if imgui.DragFloat("Y##" .. k, vector2Ptr:offset(4), 0.05, 0.0, 0.0, "%.4f", 0) == 1 and not readOnly then
-					t[k].Y = vector2Ptr:readf32(4)
+					changed = true
 				end
-
+				if changed and not readOnly then
+				t[k] = Vector2.new(
+					vector2Ptr:readf32(0),
+					vector2Ptr:readf32(4)
+					)
+				end
 				imgui.TreePop()
 			else
 				imgui.SameLine()
@@ -110,21 +119,33 @@ local function PropertiesObject(obj)
 			end
 		elseif vType == "Vector3" then
 			if imgui.TreeNodeEx(k .. ":", node_flags) == 1 then
+				local step = 0.05
+				if k == "Rotation" then
+					step = 0.25
+				end
 				vector3Ptr:writef32(0, v.X)
 				vector3Ptr:writef32(4, v.Y)
 				vector3Ptr:writef32(8, v.Z)
 				
-				if imgui.DragFloat("X##" .. k, vector3Ptr:offset(0), 0.05, 0.0, 0.0, "%.4f", 0) == 1 and not readOnly then
-					t[k].X = vector3Ptr:readf32(0)
+				local changed = false
+				if imgui.DragFloat("X##" .. k, vector3Ptr:offset(0), step, 0.0, 0.0, "%.4f", 0) == 1 and not readOnly then
+					changed = true
+				end
+				if imgui.DragFloat("Y##" .. k, vector3Ptr:offset(4), step, 0.0, 0.0, "%.4f", 0) == 1 and not readOnly then
+					changed = true
+				end
+				if imgui.DragFloat("Z##" .. k, vector3Ptr:offset(8), step, 0.0, 0.0, "%.4f", 0) == 1 and not readOnly then
+					changed = true
 				end
 
-				if imgui.DragFloat("Y##" .. k, vector3Ptr:offset(4), 0.05, 0.0, 0.0, "%.4f", 0) == 1 and not readOnly then
-					t[k].Y = vector3Ptr:readf32(4)
+				if changed and not readOnly then
+				t[k] = Vector3.new(
+					vector3Ptr:readf32(0),
+					vector3Ptr:readf32(4),
+					vector3Ptr:readf32(8)
+				)
 				end
-
-				if imgui.DragFloat("Z##" .. k, vector3Ptr:offset(8), 0.05, 0.0, 0.0, "%.4f", 0) == 1 and not readOnly then
-					t[k].Z = vector3Ptr:readf32(8)
-				end
+				
 				imgui.TreePop()
 			else
 				imgui.SameLine()
@@ -133,46 +154,42 @@ local function PropertiesObject(obj)
 				imgui.Text(text:format(v.X, v.Y, v.Z))
 			end
 		elseif vType == "Color3" then
-			if imgui.TreeNodeEx(k .. ":", node_flags) == 1 then
-				-- we can reuse the vector3 pointer here
-				vector3Ptr:writef32(0, v.R)
-				vector3Ptr:writef32(4, v.G)
-				vector3Ptr:writef32(8, v.B)
-				if imgui.DragFloat("R##" .. k, vector3Ptr:offset(0), 0.001, 0.0, 1.0, "%f", 0) == 1 and not readOnly then
-					t[k].R = math.clamp(vector3Ptr:readf32(0), 0, 1)
-				end
+			vector3Ptr:writef32(0, v.R)
+			vector3Ptr:writef32(4, v.G)
+			vector3Ptr:writef32(8, v.B)
 
-				if imgui.DragFloat("G##" .. k, vector3Ptr:offset(4), 0.001, 0.0, 1.0, "%f", 0) == 1 and not readOnly then
-					t[k].G = math.clamp(vector3Ptr:readf32(4), 0, 1)
-				end
-
-				if imgui.DragFloat("B##" .. k, vector3Ptr:offset(8), 0.001, 0.0, 1.0, "%f", 0) == 1 and not readOnly then
-					t[k].B = math.clamp(vector3Ptr:readf32(8), 0, 1)
-				end
-
-				imgui.TreePop()
-			else
-				imgui.SameLine()
-
-				local text = "%.4f, %.4f, %.4f"
-				imgui.Text(text:format(v.R, v.G, v.B))
+			if imgui.ColorEdit3("Color3", vector3Ptr, 0) == 1 then
+				t[k] = Color3.new(
+					math.clamp(vector3Ptr:readf32(0), 0, 1),
+					math.clamp(vector3Ptr:readf32(4), 0, 1),
+					math.clamp(vector3Ptr:readf32(8), 0, 1)
+				)
 			end
+
 		elseif vType == "CFrame" then
 			if imgui.TreeNodeEx(k, node_flags) == 1 then
 				if imgui.TreeNodeEx("Position", node_flags) == 1 then
 					vector3Ptr:writef32(0, v.Position.X)
 					vector3Ptr:writef32(4, v.Position.Y)
 					vector3Ptr:writef32(8, v.Position.Z)
+
+					local changed = false
 					if imgui.DragFloat("X##" .. k, vector3Ptr:offset(0), 0.1, 0.0, 0.0, "%.4f", 0) == 1 and not readOnly then
-						t[k].Position.X = vector3Ptr:readf32(0)
+						changed = true
 					end
-
 					if imgui.DragFloat("Y##" .. k, vector3Ptr:offset(4), 0.1, 0.0, 0.0, "%.4f", 0) == 1 and not readOnly then
-						t[k].Position.Y = vector3Ptr:readf32(4)
+						changed = true
+					end
+					if imgui.DragFloat("Z##" .. k, vector3Ptr:offset(8), 0.1, 0.0, 0.0, "%.4f", 0) == 1 and not readOnly then
+						changed = true
 					end
 
-					if imgui.DragFloat("Z##" .. k, vector3Ptr:offset(8), 0.1, 0.0, 0.0, "%.4f", 0) == 1 and not readOnly then
-						t[k].Position.Z = vector3Ptr:readf32(8)
+					if changed and not readOnly then
+					t[k] = Vector3.new(
+						vector3Ptr:readf32(0),
+						vector3Ptr:readf32(4),
+						vector3Ptr:readf32(8)
+					)
 					end
 
 					imgui.TreePop()

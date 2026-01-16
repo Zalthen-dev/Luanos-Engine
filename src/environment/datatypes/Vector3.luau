@@ -87,4 +87,11 @@ function Vector3.__unm(a)
     return Vector3.new(-a.X, -a.Y, -a.Z)
 end
 
+-- Constants
+Vector3.zero  = table.freeze(Vector3.new(0, 0, 0))
+Vector3.one   = table.freeze(Vector3.new(1, 1, 1))
+Vector3.xAxis = table.freeze(Vector3.new(1, 0, 0))
+Vector3.yAxis = table.freeze(Vector3.new(0, 1, 0))
+Vector3.zAxis = table.freeze(Vector3.new(0, 0, 1))
+
 return Vector3

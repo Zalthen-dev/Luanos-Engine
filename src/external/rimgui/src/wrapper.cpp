@@ -249,6 +249,10 @@ extern "C" {
         return ImGui::ColorEdit4(label, col, flags);
     }
 
+    bool ColorEdit3(const char* label, float col[3], int flags) {
+        return ImGui::ColorEdit3(label, col, flags);
+    }
+
     bool BeginMenu(const char* label) {
         return ImGui::BeginMenu(label);
     }
@@ -275,6 +279,10 @@ extern "C" {
 
     void EndMainMenuBar() {
         ImGui::EndMainMenuBar();
+    }
+
+    bool BeginViewportSideBar(const char* name, ImGuiViewport* viewport, int dir, float size, int flags) {
+        return ImGui::BeginViewportSideBar(name, viewport, (ImGuiDir)dir, size, flags);
     }
 
     bool BeginPopupContextWindow() {
@@ -335,13 +343,21 @@ extern "C" {
         return cImVec2(avail.x, avail.y);
     }
 
+    float GetWindowWidth() {
+        return ImGui::GetWindowWidth();
+    }
+
+    float GetWindowHeight() {
+        return ImGui::GetWindowHeight();
+    }
+
     ImVec2_FFI GetContentRegionAvail() {
         ImVec2 avail = ImGui::GetContentRegionAvail();
         return cImVec2(avail.x, avail.y);
     }
 
-    ImVec2_FFI CalcTextSize(const char* text) {
-        ImVec2 size = ImGui::CalcTextSize(text);
+    ImVec2_FFI CalcTextSize(const char* text, const char* text_end, bool hide_text_after_double_hash, float wrap_width) {
+        ImVec2 size = ImGui::CalcTextSize(text, text_end, hide_text_after_double_hash, wrap_width);
         return cImVec2(size.x, size.y);
     }
 
@@ -357,7 +373,11 @@ extern "C" {
         ImGui::EndTooltip();
     }
 
-    bool BeginChild(const char str, ImVec2_FFI size, bool border, int flags) {
+    void Dummy(ImVec2_FFI size) {
+        ImGui::Dummy(ImVec2(size.x, size.y));
+    }
+
+    bool BeginChild(const char* str, ImVec2_FFI size, bool border, int flags) {
         return ImGui::BeginChild(str, ImVec2(size.x, size.y), border, flags);
     }
 
@@ -497,6 +517,23 @@ extern "C" {
         return cImVec2(pos.x, pos.y);
     }
 
+    ImVec2_FFI GetCursorStartPos() {
+        ImVec2 pos = ImGui::GetCursorStartPos();
+        return cImVec2(pos.x, pos.y);
+    }
+
+    int GetCursorPosX() {
+        return ImGui::GetCursorPosX();
+    }
+
+    int GetCursorPosY() {
+        return ImGui::GetCursorPosY();
+    }
+
+    void SetNextItemAllowOverlap() {
+        ImGui::SetNextItemAllowOverlap();
+    }
+    
     void SetCursorPosX(int x) {
         ImGui::SetCursorPosX(x);
     }
@@ -505,7 +542,11 @@ extern "C" {
         ImGui::SetCursorPosY(y);
     }
 
-    float GetFrameHeight() {
+    int GetTextLineHeightWithSpacing() {
+        return ImGui::GetTextLineHeightWithSpacing();
+    }
+    
+    int GetFrameHeight() {
         return ImGui::GetFrameHeight();
     }
 
@@ -515,6 +556,10 @@ extern "C" {
 
     float GetScrollMaxY() {
         return ImGui::GetScrollMaxY();
+    }
+
+    void SetScrollY(float y) {
+        ImGui::SetScrollY(y);
     }
 
     void SetScrollHereY(float center_y_ratio) {

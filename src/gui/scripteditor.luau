@@ -6,6 +6,7 @@ local ffi = zune.ffi
 local mem = zune.mem
 
 local defaultSize = imgui.NewImVec2(600, 400)
+local editorPadding = imgui.NewImVec2(0, 0)
 
 local tab_Meta = {}
 tab_Meta.__index = tab_Meta
@@ -21,6 +22,8 @@ scriptEditor = window.Create(function()
         end
         local tabName = tab.Instance.Name
         tabName = tabName:len() > 0 and tabName or "LocalScript"
+        imgui.PushStyleVarVec2(imgui.StyleVar.WindowPadding, editorPadding)
+        
         imgui.SetNextWindowSize(defaultSize,imgui.IMGUI_COND_FIRST_USE_EVER)
         if imgui.Begin(string.format("%s##%s%s",tabName,tostring(tab.Instance),tostring(tab.Instance.UniqueId)), tab.Visible) == 1 then
             if tab.Editor:draw("##Editor",imgui.GetContentRegionAvail(), scriptEditor.flags) == 1 then
@@ -30,6 +33,8 @@ scriptEditor = window.Create(function()
             end
         end
         imgui.End()
+
+        imgui.PopStyleVar()
     end
 end)
 
@@ -72,6 +77,7 @@ function tab_Meta:Close()
     if index then
         table.remove(scriptEditor.Tabs, index)
     end
+    setmetatable(self,{})
     self = nil
 end
 

@@ -43,20 +43,29 @@ local config = filesystem.readtoml("engine.toml")
 ProcessArgs(process.args)
 
 local engineState = InitializeEngine()
+local LogService = engineState.game:GetService("LogService")
 engineState.config = config
 sandboxer.environment = require("./environment/datatypes/test")
 sandboxer.environment.time = rl.GetTime
+
+-- 0 = Output, 1 = Info, 2 = Warn, 3 = Error
 sandboxer.environment.print = function(...)
 	local args = {...}
 	local str = table.concat(args, "	")
-	engineState.game:GetService("LogService"):_AddLog(str, 0)
+	LogService:_AddLog(str, 0)
 	print(...)
 end
 sandboxer.environment.warn = function(...)
 	local args = {...}
 	local str = table.concat(args, "	")
-	engineState.game:GetService("LogService"):_AddLog(str, 2)
+	LogService:_AddLog(str, 2)
 	print(...)
+end
+sandboxer.environment.error = function(...)
+	local args = {...}
+	local str = table.concat(args, "	")
+	LogService:_AddLog(str, 3)
+	error(...)
 end
 sandboxer.environment.loadstring = function(...)
 	if not engineState.game:GetService("ServerScriptService").LoadStringEnabled then

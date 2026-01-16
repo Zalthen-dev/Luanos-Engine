@@ -173,20 +173,42 @@ function Instance:GetDescendants()
 	return result
 end
 
+-- i changed how cloning works cause the vectors and such were shared between objects.
+-- can probably be remade to be better
+local function DeepClone(value, seen)
+    if type(value) ~= "table" then
+        return value
+    end
+    seen = seen or {}
+    if seen[value] then
+        return seen[value]
+    end
+    local out = {}
+    seen[value] = out
+    for k, v in pairs(value) do
+        out[DeepClone(k, seen)] = DeepClone(v, seen)
+    end
+    local mt = getmetatable(value)
+    if mt then
+        setmetatable(out, mt)
+    end
+    return out
+end
+
 function Instance:Clone()
-	local copy = Instance.new(self.ClassName)
+    local copy = Instance.new(self.ClassName)
 
-	for k, v in pairs(self._props) do
-		if k ~= "Parent" and k ~= "Children" then
-			copy[k] = v
-		end
-	end
+    for k, v in pairs(self._props) do
+        if k ~= "Parent" and k ~= "Children" then
+            copy._props[k] = DeepClone(v)
+        end
+    end
 
-	for _, child in ipairs(self.Children) do
-		child:Clone().Parent = copy
-	end
+    for _, child in ipairs(self.Children) do
+        child:Clone().Parent = copy
+    end
 
-	return copy
+    return copy
 end
 
 -- attributes

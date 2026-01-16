@@ -116,7 +116,7 @@ self = window.Create(function()
 				newObj.Parent = obj.Parent
 
 				Selection:Remove(obj)
-				Selection:Add({ newObj })
+				Selection:Set({ newObj })
 			end
 
 			if imgui.Selectable("Delete") == 1 then
@@ -179,7 +179,7 @@ self = window.Create(function()
 						newObj.Name = className
 						newObj.Parent = insert_Target
 
-						Selection:Remove({insert_Target})
+						Selection:Clear()
 						Selection:Add(newObj)
 
 						insert_Target._NODE_FORCE_EXPAND = true

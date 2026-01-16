@@ -91,8 +91,10 @@ type Fns = {
     ShowDemoWindow: () -> (),
     ShowStyleEditor: () -> (),
 
+    Dummy: (size:ImVec2) -> (),
     Begin: (label:cstring, p_open:FFIPointer, flags:int?) -> (bool),
     End: () -> (),
+    BeginViewportSideBar:(label:cstring, viewport:FFIPointer, dir:int, size: float, flags: int) -> (bool),
     BeginChild: (label:cstring, size:ImVec2, border:bool, flags:int) -> (bool),
     EndChild: () -> (),
     BeginMenu: (label: cstring) -> (bool),
@@ -132,6 +134,8 @@ type Fns = {
     Checkbox: (cstring, FFIPointer) -> (bool),
     RadioButton: (cstring, bool) -> (bool),
 
+    ColorEdit3: (label:cstring, value: FFIPointer, flags: int) -> (bool),
+    ColorEdit4: (label:cstring, value: FFIPointer, flags: int) -> (bool),
     DragFloat: (label:cstring, value:FFIPointer, speed:float, min:float, max:float, format:cstring, flags:int) -> (bool),
     DragInt: (label:cstring, value:FFIPointer, speed:float, min:int, max:int, format:cstring, flags:int) -> (bool),
     SliderFloat: (label:cstring, value:FFIPointer, min:float, max:float, format:cstring, flags:int) -> (bool),
@@ -157,14 +161,20 @@ type Fns = {
     EndTabItem: () -> (),
 
     GetWindowSize: () -> (ImVec2),
+    GetWindowHeight: () -> (float),
     GetContentRegionAvail: () -> (ImVec2),
+    GetTextLineHeightWithSpacing: () -> (float),
     GetViewportSize: (FFIPointer) -> (ImVec2),
     GetCursorScreenPos: () -> (ImVec2),
-    CalcTextSize: (cstring) -> (ImVec2),
+    CalcTextSize: (cstring, cstring, bool, float) -> (ImVec2),
+    GetCursorPosX: () -> (int),
+    GetCursorPosY: () -> (int),
     SetCursorPosX: (int) -> (),
     SetCursorPosY: (int) -> (),
+    GetCursorStartPos: () -> (ImVec2),
     SetNextWindowSize: (ImVec2, int) -> (),
     SetNextItemOpen: (bool, int) -> (),
+    SetNextItemAllowOverlap: () -> (),
 
     IsItemClicked: () -> (),
     IsMouseDoubleClicked: (int) -> (bool),
@@ -185,6 +195,7 @@ type Fns = {
 
     GetScrollY: () -> (float),
     GetScrollMaxY: () -> (float),
+    SetScrollY: (float) -> (),
     SetScrollHereY: (float) -> (),
 
     DockSpaceOverViewport: (idx:int, viewport:FFIPointer, flags:int) -> (int),
@@ -235,8 +246,10 @@ local defs = {
     ShowDemoWindow = fn(void, {}),
     ShowStyleEditor = fn(void, {}),
 
+    Dummy = fn(void, {ImVec2}),
     Begin = fn(bool, {cstring, pointer_bool, int}),
     End = fn(void, {}),
+    BeginViewportSideBar = fn(bool, {cstring, pointer, int, float, int}),
     BeginChild = fn(bool, {cstring, ImVec2, bool, int}),
     EndChild = fn(void, {}),
     BeginMenu = fn(bool, {cstring}),
@@ -265,7 +278,7 @@ local defs = {
 
     Text = fn(void, {cstring}),
     TextLinkOpenURL = fn(void, {cstring, cstring}),
-    TextColored = fn(void, {ImVec4}),
+    TextColored = fn(void, {ImVec4, cstring}),
     TextUnformatted = fn(void, {cstring}),
     TextDisabled = fn(void, {cstring}),
     TextWrapped = fn(void, {cstring}),
@@ -276,6 +289,8 @@ local defs = {
     Checkbox = fn(bool, {cstring, pointer_bool}),
     RadioButton = fn(bool, {cstring, bool}),
 
+    ColorEdit3 = fn(bool, {cstring, pointer, int}),
+    ColorEdit4 = fn(bool, {cstring, pointer, int}),
     DragFloat = fn(bool, {cstring, pointer, float, float, float, cstring, int}),
     DragInt = fn(bool, {cstring, pointer, float, int, int, cstring, int}),
     SliderFloat = fn(bool, {cstring, pointer, float, float, cstring, int}),
@@ -301,14 +316,20 @@ local defs = {
     EndTabItem = fn(void, {}),
     
     GetWindowSize = fn(ImVec2, {}),
+    GetWindowHeight = fn(float, {}),
     GetContentRegionAvail = fn(ImVec2, {}),
+    GetTextLineHeightWithSpacing = fn(float, {}),
     GetViewportSize = fn(ImVec2, {pointer}),
+    GetCursorStartPos = fn(ImVec2, {}),
     GetCursorScreenPos = fn(ImVec2, {}),
-    CalcTextSize = fn(ImVec2, {cstring}),
+    GetCursorPosX = fn(int,{}),
+    GetCursorPosY = fn(int,{}),
+    CalcTextSize = fn(ImVec2, {cstring, cstring, bool, float}),
     SetCursorPosX = fn(void, {int}),
     SetCursorPosY = fn(void, {int}),
     SetNextWindowSize = fn(void, {ImVec2, int}),
     SetNextItemOpen = fn(void, {bool, int}),
+    SetNextItemAllowOverlap = fn(void, {}),
 
     IsItemClicked = fn(bool, {}),
     IsMouseDoubleClicked = fn(bool, {int}),
@@ -328,6 +349,7 @@ local defs = {
 
     GetScrollY = fn(float, {}),
     GetScrollMaxY = fn(float, {}),
+    SetScrollY = fn(void, {float}),
     SetScrollHereY = fn(void, {float}),
 
     DockSpaceOverViewport = fn(uint, {uint, pointer, int}),
@@ -619,7 +641,7 @@ return {
         SeparatorTextBorderSize = 25,
         SeparatorTextAlign      = 26,
         SeparatorTextPadding    = 27,
-        DockingSeparatorSize    = 28,
+        DockingSeparatorSize    = 39,
     },
 
     rImGuiDisableIO = lib.rImGuiDisableIO,
@@ -637,8 +659,10 @@ return {
     ShowDemoWindow = lib.ShowDemoWindow,
     ShowStyleEditor = lib.ShowStyleEditor,
 
+    Dummy = lib.Dummy,
     Begin = function(text: string, p_open: FFIPointer?, flags: int?) return lib.Begin(text, p_open, flags or 0) end,
     End = lib.End,
+    BeginViewportSideBar = lib.BeginViewportSideBar,
     BeginChild = function(text: string, size: ImVec2?, border: boolean?, flags: int?)
         if not size then size = ImVec2:new({x = 0, y = 0}) end
         if type(border) ~= "boolean" then border = false end
@@ -680,6 +704,8 @@ return {
     LabelText = lib.LabelText,
     BulletText = lib.BulletText,
 
+    ColorEdit3 = lib.ColorEdit3,
+    ColorEdit4 = lib.ColorEdit4,
     DragFloat = lib.DragFloat,
     DragInt = lib.DragInt,
     SliderFloat = lib.SliderFloat,
@@ -718,14 +744,25 @@ return {
     EndTabItem = lib.EndTabItem,
 
     GetWindowSize = lib.GetWindowSize,
+    GetWindowHeight = lib.GetWindowHeight,
     GetContentRegionAvail = lib.GetContentRegionAvail,
+    GetTextLineHeightWithSpacing = lib.GetTextLineHeightWithSpacing,
     GetViewportSize = lib.GetViewportSize,
+    GetCursorStartPos = lib.GetCursorStartPos,
     GetCursorScreenPos = lib.GetCursorScreenPos,
-    CalcTextSize = lib.CalcTextSize,
+    CalcTextSize = function(text: string, wrap_width: float?, text_end: string?, hide_text_after_double_hash: bool?)
+        if text_end == nil then text_end = "\0" end
+        if hide_text_after_double_hash == nil then hide_text_after_double_hash = 1 end
+        if wrap_width == nil then wrap_width = -1 end
+        return lib.CalcTextSize(text,text_end,hide_text_after_double_hash,wrap_width)
+    end,
+    GetCursorPosX = lib.GetCursorPosX,
+    GetCursorPosY = lib.GetCursorPosY,
     SetCursorPosX = lib.SetCursorPosX,
     SetCursorPosY = lib.SetCursorPosY,
     SetNextWindowSize = lib.SetNextWindowSize,
     SetNextItemOpen = lib.SetNextItemOpen,
+    SetNextItemAllowOverlap = lib.SetNextItemAllowOverlap,
 
     IsAnyItemFocused = lib.IsAnyItemFocused,
     IsItemHovered = function(flag: number?) 
@@ -746,6 +783,7 @@ return {
 
     GetScrollY = lib.GetScrollY,
     GetScrollMaxY = lib.GetScrollMaxY,
+    SetScrollY = lib.SetScrollY,
     SetScrollHereY = lib.SetScrollHereY,
     
     SetTooltip = lib.SetTooltip,
