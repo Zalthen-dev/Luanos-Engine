@@ -8,9 +8,9 @@ function rayutils.MakeRect(x, y, w, h)
 end
 
 function rayutils.CubemapFromImages(imagePaths)
-    assert(#imagePaths >= 6, ("ERROR: unable to build cubemap, needs 6 images, %i image(s) were provided"):format(#imagePaths))
+    assert(#imagePaths >= 6, ("ENGINE: ERROR: unable to build cubemap, needs 6 images, %i image(s) were provided"):format(#imagePaths))
     if #imagePaths > 6 then
-        print("WARN: more than 6 images were provided, some may be unused")
+        print("ENGINE: WARN: more than 6 images were provided, some may be unused")
     end
 
     local imgs = {}

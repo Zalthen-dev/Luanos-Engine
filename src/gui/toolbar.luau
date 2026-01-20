@@ -16,7 +16,7 @@ local self = {}
 self = window.Create(function()
 
     if imgui.BeginViewportSideBar("Toolbar", imgui.GetMainViewport(), imgui.Dir.Up, height, flags) == 1 then
-        --imgui.PushStyleVarVec2(imgui.StyleVar.WindowPadding, paddingBuf)
+        imgui.PushStyleVarVec2(imgui.StyleVar.WindowPadding, paddingBuf)
 
         local avail = imgui.GetContentRegionAvail()
         local availY = buffer.readf32(avail, 4)
@@ -50,7 +50,7 @@ self = window.Create(function()
             end
         end
         imgui.SameLine()
-        --imgui.PopStyleVar()
+        imgui.PopStyleVar()
     end
 
 	imgui.End()

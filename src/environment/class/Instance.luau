@@ -45,7 +45,19 @@ local InstanceMetatable = {
 	    if self.Changed then
 	        self.Changed:Fire(key, value)
         end
-    end
+    end,
+
+	__tostring = function(self)
+		if rawget(self, "Name") then
+			return rawget(self, "Name")
+		end
+
+		if rawget(self, "ClassName") then
+			return rawget(self, "ClassName")
+		end
+
+		return "Instance"
+	end,
 }
 
 function Instance.new(className)

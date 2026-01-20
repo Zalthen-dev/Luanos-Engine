@@ -58,7 +58,7 @@ function self:Draw()
                     gizmoTransform:writef32(0, objPos.X)
                     gizmoTransform:writef32(4, objPos.Y)
                     gizmoTransform:writef32(8, objPos.Z)
-                    if rgizmo.DrawGizmo3D(rgizmo.GIZMO_TRANSLATE,gizmoTransform) == 1 then
+                    if rgizmo.DrawGizmo3D(rgizmo.GIZMO_SCALE, gizmoTransform) == 1 then
                         if not self._Dragging then
                             PreviousScale.x = objSize.X
                             PreviousScale.y = objSize.Y
@@ -93,7 +93,7 @@ function self:Draw()
                         gizmoTransform:writef32(20, qz)
                         gizmoTransform:writef32(24, qw)
 
-                        rgizmo.DrawGizmo3D(bit32.bor(flags), gizmoTransform)
+                        rgizmo.DrawGizmo3D(flags, gizmoTransform)
 
                         -- Read Position into obj
                         objPos.X = gizmoTransform:readf32(0)

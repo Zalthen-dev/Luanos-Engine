@@ -75,7 +75,7 @@ self = window.Create(function()
 
 		-- ImGui doesnt permit us to have two objects with the same name
 		-- so using the UniqueId should fix this
-		local nodeName = obj.Name .. "##" .. tostring(obj)
+		local nodeName = obj.Name .. "##" .. tostring(obj.UniqueId)
 		local nodeResult = imgui.TreeNodeEx(nodeName, flags)
 		
 		if imgui.IsItemClicked() == 1 then

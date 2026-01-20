@@ -6,3 +6,6 @@ vendor/CMakeCache.txt
 vendor/Makefile
 vendor/CPackConfig.cmake
 vendor/CPackSourceConfig.cmake
+vendor/libEngineLib.so
+vendor/libEngineLib.dll
+vendor/libEngineLib.dll.a

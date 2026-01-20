@@ -53,19 +53,19 @@ sandboxer.environment.print = function(...)
 	local args = {...}
 	local str = table.concat(args, "	")
 	LogService:_AddLog(str, 0)
-	print(...)
+	print("GAME: INFO:", ...)
 end
 sandboxer.environment.warn = function(...)
 	local args = {...}
 	local str = table.concat(args, "	")
 	LogService:_AddLog(str, 2)
-	print(...)
+	print("GAME: WARN:", ...)
 end
 sandboxer.environment.error = function(...)
 	local args = {...}
 	local str = table.concat(args, "	")
 	LogService:_AddLog(str, 3)
-	error(...)
+	print("GAME: ERROR: ", ...)
 end
 sandboxer.environment.loadstring = function(...)
 	if not engineState.game:GetService("ServerScriptService").LoadStringEnabled then
@@ -75,11 +75,13 @@ sandboxer.environment.loadstring = function(...)
 	return loadstring(...)
 end
 
-rl.SetConfigFlags(rl.FLAG_WINDOW_RESIZABLE)
+rl.SetConfigFlags(bit32.bor(rl.FLAG_WINDOW_RESIZABLE, rl.FLAG_MSAA_4X_HINT))
 
-print("ENGINE: INFO: Initializing window...")
 rl.InitWindow(1200, 800, "Luanos Engine")
 print("ENGINE: INFO: Initialized window!")
+
+rl.InitAudioDevice()
+print("ENGINE: INFO: Initialized audio device!")
 
 rl.SetTargetFPS(config.window.fps)
 rl.rlSetClipPlanes(0.01, 32768)
@@ -119,5 +121,6 @@ if #threads > 0 then
 end
 
 renderer.OnEnd()
+rl.CloseAudioDevice()
 rl.CloseWindow()
 process.exit(0)

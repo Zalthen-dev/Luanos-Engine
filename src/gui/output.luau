@@ -1,7 +1,7 @@
 local imgui = require("@imgui")
 local window = require("@window")
-
 local Enum = require("@Enum")
+
 local max_Logs = 500
 local childSize = imgui.NewImVec2(-1, -1)
 local self = {}

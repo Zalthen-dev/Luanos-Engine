@@ -26,6 +26,11 @@ center2.Position = originPos + Vector3.new(50, 0, 0)
 center2.Transparency = 0.5
 center2.Parent = workspace
 
+local sound = Instance.new("Sound")
+sound.SoundId = "src/assets/sounds/bbqchickenalert.mp3"
+sound.Parent = workspace
+sound:Play()
+
 print("Hello")
 warn("Warning aah!!")
 
@@ -40,6 +45,7 @@ for i = 1, parts do
 	part.Name = "Part" .. tostring(i)
 	part.Parent = workspace
 
+	--[[
 	local offset = math.random(-1000, 1000)
 	local dist = part.Position.Magnitude
 	local orbitTime = (dist^2)/1000000
@@ -51,4 +57,9 @@ for i = 1, parts do
 			math.cos(v)*dist
 		)
 	end)
+	]]
+	
 end
+
+
+error("Scary!")

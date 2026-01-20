@@ -4,7 +4,14 @@ project(EngineLib LANGUAGES CXX C)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_compile_definitions(_GLFW_X11 PLATFORM_DESKTOP BUILD_LIBTYPE_SHARED)
+if(WIN32)
+    add_compile_definitions(PLATFORM_DESKTOP BUILD_LIBTYPE_SHARED)
+elseif(APPLE)
+    add_compile_definitions(_GLFW_X11 PLATFORM_DESKTOP BUILD_LIBTYPE_SHARED)
+elseif(UNIX)
+    add_compile_definitions(_GLFW_X11 PLATFORM_DESKTOP BUILD_LIBTYPE_SHARED)
+endif()
+
 set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
 
 add_subdirectory(raylib)

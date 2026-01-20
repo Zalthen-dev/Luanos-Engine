@@ -5,6 +5,7 @@ Signal.__index = Signal
 
 local Connection = {}
 Connection.__index = Connection
+Connection.__type = "Connection"
 
 function Connection.new(signal, fn)
 	local self = setmetatable({}, Connection)
