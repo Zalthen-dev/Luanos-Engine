@@ -29,9 +29,10 @@ function self:Draw()
     local engineState = renderer.EngineState
     local selection = engineState.game:GetService("Selection"):Get()
 
+	-- ok for some odd reason the gizmo selection behaves weirdly when the mouse is scaled
     -- make the mouse match the viewport pos/size
     rl.SetMouseOffset(-renderer.ViewportPosition.X, -renderer.ViewportPosition.Y)
-    rl.SetMouseScale(rl.GetScreenWidth() / renderer.ViewportSize.X, rl.GetScreenHeight() / renderer.ViewportSize.Y)
+    --rl.SetMouseScale(rl.GetScreenWidth() / renderer.ViewportSize.X, rl.GetScreenHeight() / renderer.ViewportSize.Y)
 
     if #selection == 1 then
         local obj = selection[1]
@@ -39,6 +40,12 @@ function self:Draw()
             if obj.Position then
                 rl.BeginTextureMode(renderer.ViewTexture)
                 rl.BeginMode3D(camera)
+
+				local ray = rl.GetScreenToWorldRay(rl.GetMousePosition(), renderer.Camera)
+				local position = zune.mem.toVector3(ray, 0)
+				local direction = zune.mem.toVector3(ray, 12)
+
+				rl.DrawSphere(position + direction, 0.1, rl.GREEN)
 
                 local objPos = obj.Position
                 local objSize = obj.Size
@@ -58,7 +65,7 @@ function self:Draw()
                     gizmoTransform:writef32(0, objPos.X)
                     gizmoTransform:writef32(4, objPos.Y)
                     gizmoTransform:writef32(8, objPos.Z)
-                    if rgizmo.DrawGizmo3D(rgizmo.GIZMO_SCALE, gizmoTransform) == 1 then
+                    if rgizmo.DrawGizmo3D(rgizmo.GIZMO_TRANSLATE, gizmoTransform) == 1 then
                         if not self._Dragging then
                             PreviousScale.x = objSize.X
                             PreviousScale.y = objSize.Y
@@ -112,13 +119,16 @@ function self:Draw()
                     end
                 end
                 rl.EndMode3D()
+
+				
+				
                 rl.EndTextureMode()
             end
         end
     end
 
     rl.SetMouseOffset(0,0)
-    rl.SetMouseScale(1,1)
+    --rl.SetMouseScale(1,1)
 end
 
 -- Gizmo Set/Get functions:

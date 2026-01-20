@@ -4,7 +4,7 @@ local filesystem = require("./modules/filesystem")
 local sandboxer = require("./modules/sandboxer")
 
 _G.warn = function(...)
-	print("WARN: ", ...)
+	print("ENGINE: WARN: ", ...)
 end
 
 local InitializeEngine = require("./environment/get")
@@ -53,19 +53,19 @@ sandboxer.environment.print = function(...)
 	local args = {...}
 	local str = table.concat(args, "	")
 	LogService:_AddLog(str, 0)
-	print("GAME: INFO:", ...)
+	print("GAME: INFO:" .. str)
 end
 sandboxer.environment.warn = function(...)
 	local args = {...}
 	local str = table.concat(args, "	")
 	LogService:_AddLog(str, 2)
-	print("GAME: WARN:", ...)
+	print("GAME: WARN:" .. str)
 end
 sandboxer.environment.error = function(...)
 	local args = {...}
 	local str = table.concat(args, "	")
 	LogService:_AddLog(str, 3)
-	print("GAME: ERROR: ", ...)
+	error("GAME: ERROR: " .. str)
 end
 sandboxer.environment.loadstring = function(...)
 	if not engineState.game:GetService("ServerScriptService").LoadStringEnabled then
@@ -75,10 +75,14 @@ sandboxer.environment.loadstring = function(...)
 	return loadstring(...)
 end
 
-rl.SetConfigFlags(bit32.bor(rl.FLAG_WINDOW_RESIZABLE, rl.FLAG_MSAA_4X_HINT))
+rl.SetConfigFlags(rl.FLAG_WINDOW_RESIZABLE)
+rl.SetConfigFlags(rl.FLAG_MSAA_4X_HINT)
 
 rl.InitWindow(1200, 800, "Luanos Engine")
 print("ENGINE: INFO: Initialized window!")
+
+local icon = rl.LoadImage("./repo/LuanosEngineLogo.png")
+rl.SetWindowIcon(icon)
 
 rl.InitAudioDevice()
 print("ENGINE: INFO: Initialized audio device!")

@@ -853,7 +853,6 @@ return {
 	rlGetCullDistanceNear = lib.rlGetCullDistanceNear,
 	rlGetCullDistanceFar = lib.rlGetCullDistanceFar,
 
-	GuiWindowBox = lib.GuiWindowBox,
 	lib = lib,
 
 	-- rip not organized

@@ -215,48 +215,48 @@ local defs = {
     GuiSetStyle = fn(void, { int, int, int }),
     GuiGetStyle = fn(int, { int, int }),
 
-    GuiWindowBox = fn(bool, { pointer, cstring }),
-    GuiGroupBox  = fn(void, { pointer, cstring }),
-    GuiLine      = fn(void, { pointer, cstring }),
-    GuiPanel     = fn(void, { pointer, cstring }),
-    GuiScrollPanel = fn(void, { pointer, cstring, pointer, pointer, pointer }),
+    GuiWindowBox = fn(bool, { rl.Rectangle, cstring }),
+    GuiGroupBox  = fn(void, { rl.Rectangle, cstring }),
+    GuiLine      = fn(void, { rl.Rectangle, cstring }),
+    GuiPanel     = fn(void, { rl.Rectangle, cstring }),
+    GuiScrollPanel = fn(void, { rl.Rectangle, cstring, rl.Rectangle, pointer, pointer }),
 
-    GuiLabel        = fn(void, { pointer, cstring }),
-    GuiButton       = fn(bool, { pointer, cstring }),
-    GuiLabelButton  = fn(bool, { pointer, cstring }),
-    GuiToggle       = fn(bool, { pointer, cstring, bool }),
-    GuiToggleGroup  = fn(int, { pointer, cstring, int }),
-    GuiCheckBox     = fn(bool, { pointer, cstring, pointer }),
-    GuiComboBox     = fn(int, { pointer, cstring, pointer }),
-    GuiDropdownBox  = fn(bool, { pointer, cstring, pointer, bool }),
+    GuiLabel        = fn(void, { rl.Rectangle, cstring }),
+    GuiButton       = fn(bool, { rl.Rectangle, cstring }),
+    GuiLabelButton  = fn(bool, { rl.Rectangle, cstring }),
+    GuiToggle       = fn(bool, { rl.Rectangle, cstring, bool }),
+    GuiToggleGroup  = fn(int, { rl.Rectangle, cstring, int }),
+    GuiCheckBox     = fn(bool, { rl.Rectangle, cstring, pointer }),
+    GuiComboBox     = fn(int, { rl.Rectangle, cstring, pointer }),
+    GuiDropdownBox  = fn(bool, { rl.Rectangle, cstring, pointer, bool }),
 
-    GuiSlider       = fn(float, { pointer, cstring, cstring, pointer, float, float }),
-    GuiSliderBar    = fn(float, { pointer, cstring, cstring, pointer, float, float }),
-    GuiProgressBar  = fn(float, { pointer, cstring, cstring, pointer, float, float }),
+    GuiSlider       = fn(float, { rl.Rectangle, cstring, cstring, pointer, float, float }),
+    GuiSliderBar    = fn(float, { rl.Rectangle, cstring, cstring, pointer, float, float }),
+    GuiProgressBar  = fn(float, { rl.Rectangle, cstring, cstring, pointer, float, float }),
 
-    GuiSpinner  = fn(bool, { pointer, cstring, pointer, int, int, bool }),
-    GuiValueBox = fn(bool, { pointer, cstring, pointer, int, int, bool }),
+    GuiSpinner  = fn(bool, { rl.Rectangle, cstring, pointer, int, int, bool }),
+    GuiValueBox = fn(bool, { rl.Rectangle, cstring, pointer, int, int, bool }),
 
-    GuiTextBox      = fn(bool, { pointer, cstring, int, bool }),
+    GuiTextBox      = fn(bool, { rl.Rectangle, cstring, int, bool }),
 
-    GuiListView   = fn(int, { pointer, cstring, pointer, pointer }),
-    GuiListViewEx = fn(int, { pointer, pointer, int, pointer, pointer, pointer }),
+    GuiListView   = fn(int, { rl.Rectangle, cstring, pointer, pointer }),
+    GuiListViewEx = fn(int, { rl.Rectangle, pointer, int, pointer, pointer, pointer }),
 
-    GuiColorPicker   = fn(bool, { pointer, cstring, pointer }),
-    GuiColorPanel    = fn(pointer, { pointer, cstring, pointer }),
-    GuiColorBarAlpha = fn(float, { pointer, cstring, pointer }),
-    GuiColorBarHue   = fn(float, { pointer, cstring, pointer }),
+    GuiColorPicker   = fn(bool, { rl.Rectangle, cstring, pointer }),
+    GuiColorPanel    = fn(pointer, { rl.Rectangle, cstring, pointer }),
+    GuiColorBarAlpha = fn(float, { rl.Rectangle, cstring, pointer }),
+    GuiColorBarHue   = fn(float, { rl.Rectangle, cstring, pointer }),
 
     GuiIconText     = fn(cstring, { int, cstring }),
     GuiSetIconScale = fn(void, { int }),
 
-    GuiStatusBar = fn(void, { pointer, cstring }),
-    GuiDummyRec  = fn(void, { pointer, cstring }),
+    GuiStatusBar = fn(void, { rl.Rectangle, cstring }),
+    GuiDummyRec  = fn(void, { rl.Rectangle, cstring }),
 
-    GuiMessageBox = fn(int, { pointer, cstring, cstring, cstring }),
+    GuiMessageBox = fn(int, { rl.Rectangle, cstring, cstring, cstring }),
     GuiTextInputBox = fn(
         int,
-        { pointer, cstring, cstring, cstring, cstring, int, pointer }
+        { rl.Rectangle, cstring, cstring, cstring, cstring, int, pointer }
     ),
 
     GuiLoadStyle        = fn(void, { cstring }),

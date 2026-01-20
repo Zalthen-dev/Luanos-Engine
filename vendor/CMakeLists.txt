@@ -4,6 +4,16 @@ project(EngineLib LANGUAGES CXX C)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+add_compile_definitions(
+	SUPPORT_FILEFORMAT_WAV 
+	SUPPORT_FILEFORMAT_OGG 
+	SUPPORT_FILEFORMAT_MP3 
+	SUPPORT_FILEFORMAT_QOA 
+	SUPPORT_FILEFORMAT_FLAC 
+	SUPPORT_FILEFORMAT_XM 
+	SUPPORT_FILEFORMAT_MOD
+)
+
 if(WIN32)
     add_compile_definitions(PLATFORM_DESKTOP BUILD_LIBTYPE_SHARED)
 elseif(APPLE)
@@ -21,7 +31,7 @@ file(GLOB imgui_texteditor_SRC 		imgui_texteditor/*.cpp imgui_texteditor/*.h)
 file(GLOB imgui_colortexteditor_SRC imgui_colortexteditor/*.cpp imgui_colortexteditor/*.h)
 file(GLOB imguicolortextedit_SRC 	ImGuiColorTextEdit/*.cpp ImGuiColorTextEdit/*.h)
 file(GLOB raylibgizmo_SRC 			raylib-gizmo/src/*.c raylib-gizmo/src/*.h)
-file(GLOB raygui_SRC 				raygui/src/*.h)
+file(GLOB raygui_SRC 				raygui/src/*.h raygui/src/*.c)
 file(GLOB rlimgui_SRC 				rlImGui/*.cpp rlImGui/*.h)
 
 add_library(${PROJECT_NAME} SHARED

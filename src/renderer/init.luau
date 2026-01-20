@@ -1,5 +1,6 @@
 local Signal = require("@signal")
 local rl = require("@raylib")
+local rg = require("@raygui")
 local imgui = require("@imgui")
 local utils = require("@utils")
 local rayutils = require("@rayutils")
@@ -44,12 +45,14 @@ renderer.MainSignal = Signal.new()
 renderer.Wireframes = {}
 renderer.RenderPool3D = {}
 renderer.RenderPool2D = {}
+renderer.RenderPoolCustom = {} -- render pool for objects that have custom rendering
 
 renderer.ViewportActive = true
 renderer.Visible = true
 renderer.ViewTexture = nil
 
 renderer.ActuallyDrawn3D = 0
+renderer.ActuallyDrawn2D = 0
 
 local function DrawTextOutlined(
 	text: string,
@@ -244,6 +247,15 @@ function renderer.AddToRenderPool2D(data)
 	renderer.MainSignal:Fire("AddedObjectToRenderPool2D", data())
 end
 
+function renderer.DrawDebugInfo()
+	DrawTextOutlined(tostring(rl.GetFPS()) .. " FPS", 10, 10, 20, rl.GREEN, 2, rl.BLACK)
+	DrawTextOutlined(tostring(task.count()) .. " tasks", 10, 30, 20, rl.WHITE, 2, rl.BLACK)
+	DrawTextOutlined(tostring(#renderer.RenderPool3D) .. " render pool 3D", 10, 50, 20, rl.WHITE, 2, rl.BLACK)
+	DrawTextOutlined(tostring(#renderer.RenderPool2D) .. " render pool 2D", 10, 70, 20, rl.WHITE, 2, rl.BLACK)
+	DrawTextOutlined(tostring(renderer.ActuallyDrawn3D) .. " drawn parts", 10, 90, 20, rl.WHITE, 2, rl.BLACK)
+	DrawTextOutlined(tostring(renderer.ActuallyDrawn2D) .. " drawn gui's", 10, 110, 20, rl.WHITE, 2, rl.BLACK)
+end
+
 function renderer.Render3DScene()
 	renderer.Camera = camera
 	renderer.UpdateFreecam(camera, rl.GetFrameTime())
@@ -306,12 +318,25 @@ function renderer.Render3DScene()
 		end
 
 	end; rl.EndMode3D()
+end
 
-	DrawTextOutlined(tostring(rl.GetFPS()) .. " FPS", 10, 10, 20, rl.GREEN, 2, rl.BLACK)
-	DrawTextOutlined(tostring(task.count()) .. " tasks", 10, 30, 20, rl.WHITE, 2, rl.BLACK)
-	DrawTextOutlined(tostring(#renderer.RenderPool3D) .. " render pool 3D", 10, 50, 20, rl.WHITE, 2, rl.BLACK)
-	DrawTextOutlined(tostring(#renderer.RenderPool2D) .. " render pool 2D", 10, 70, 20, rl.WHITE, 2, rl.BLACK)
-	DrawTextOutlined(tostring(renderer.ActuallyDrawn3D) .. " drawn parts", 10, 90, 20, rl.WHITE, 2, rl.BLACK)
+function renderer.Render2DScene()
+	renderer.ActuallyDrawn2D = 0
+
+	for i, guiGet in ipairs(renderer.RenderPool2D) do
+		local gui = guiGet()
+		if not gui.Children or gui.Destroyed then
+			table.remove(renderer.RenderPool2D, i)
+			continue
+		end
+
+		-- TODO: add drawing gui's here
+	end
+
+	local bounds = rg.NewRectangle(10, 200, 200, 60)
+	rl.DrawRectanglePro(bounds, vector.zero, math.deg(rl.GetTime()), rl.RAYWHITE)
+
+	rg.GuiWindowBox(bounds, "Window")
 end
 
 function renderer.Render3DSceneToTexture(w: number, h: number)
@@ -331,6 +356,7 @@ function renderer.Render3DSceneToTexture(w: number, h: number)
 	do rl.BeginTextureMode(renderer.ViewTexture)
 		rl.ClearBackground(rl.BLACK)
 		renderer.Render3DScene()
+		renderer.Render2DScene()
     end; rl.EndTextureMode()
 end
 
@@ -370,6 +396,8 @@ function renderer.OnEnd()
 	Mesh.Unload()
 	Skybox.Unload()
 end
+
+local rect = rl.Rectangle:new({x=200, y=200, width = 100, height = 100})
 
 function renderer.RenderScene()
 	local time = rl.GetTime()
