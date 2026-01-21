@@ -12,10 +12,7 @@ local Move = false
 local Rotate = false
 local Scale = false
 
-local self = {
-    _Dragging = false,
-}
-local PreviousScale = {x=0,y=0,z=0}
+local self = {}
 local gizmoTransform = ffi.alloc(12+16+12) -- Vector3,Vector4,Vector3
 
 -- Read Offsets:
@@ -61,26 +58,25 @@ function self:Draw()
                     flags = bit32.bor(flags, rgizmo.GIZMO_ROTATE)
                 end
                 -----------------
-                if Scale then
+
+                if flags ~= 0 then
+                    -- Write Position
                     gizmoTransform:writef32(0, objPos.X)
                     gizmoTransform:writef32(4, objPos.Y)
                     gizmoTransform:writef32(8, objPos.Z)
-                    if rgizmo.DrawGizmo3D(rgizmo.GIZMO_TRANSLATE, gizmoTransform) == 1 then
-                        if not self._Dragging then
-                            PreviousScale.x = objSize.X
-                            PreviousScale.y = objSize.Y
-                            PreviousScale.z = objSize.Z
-                        end
-                        self._Dragging = true
-                        local deltaX = gizmoTransform:readf32(0) - objPos.X
-                        local deltaY = gizmoTransform:readf32(4) - objPos.Y
-                        local deltaZ = gizmoTransform:readf32(8) - objPos.Z
+                end
 
-                        objSize.X = math.max(PreviousScale.x + deltaX,0.01)
-                        objSize.Y = math.max(PreviousScale.y + deltaY,0.01)
-                        objSize.Z = math.max(PreviousScale.z + deltaZ,0.01)
-                    else
-                        self._Dragging = false
+                if Scale then
+                    gizmoTransform:writef32(28, objSize.X)
+                    gizmoTransform:writef32(32, objSize.Y)
+                    gizmoTransform:writef32(36, objSize.Z)
+                    if rgizmo.DrawGizmo3D(rgizmo.GIZMO_SCALE, gizmoTransform) == 1 then
+                        local deltaX = gizmoTransform:readf32(28)
+                        local deltaY = gizmoTransform:readf32(32)
+                        local deltaZ = gizmoTransform:readf32(36)
+                        objSize.X = math.max(deltaX,0.01)
+                        objSize.Y = math.max(deltaY,0.01)
+                        objSize.Z = math.max(deltaZ,0.01)
                     end
                 else
                     if flags ~= 0 then
@@ -88,13 +84,9 @@ function self:Draw()
                         if LocalSpace then
                             flags = bit32.bor(flags, rgizmo.GIZMO_LOCAL)
                         end
-                        -- Write Position
-                        gizmoTransform:writef32(0, objPos.X)
-                        gizmoTransform:writef32(4, objPos.Y)
-                        gizmoTransform:writef32(8, objPos.Z)
 
                         local qx,qy,qz,qw = EulerDegToQuaternion(obj.Rotation)
-                        -- Write Rotation (not implemented)
+                        -- Write Rotation
                         gizmoTransform:writef32(12, qx)
                         gizmoTransform:writef32(16, qy)
                         gizmoTransform:writef32(20, qz)

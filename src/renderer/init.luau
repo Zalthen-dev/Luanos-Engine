@@ -332,11 +332,6 @@ function renderer.Render2DScene()
 
 		-- TODO: add drawing gui's here
 	end
-
-	local bounds = rg.NewRectangle(10, 200, 200, 60)
-	rl.DrawRectanglePro(bounds, vector.zero, math.deg(rl.GetTime()), rl.RAYWHITE)
-
-	rg.GuiWindowBox(bounds, "Window")
 end
 
 function renderer.Render3DSceneToTexture(w: number, h: number)
