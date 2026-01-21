@@ -51,8 +51,13 @@ else
     local store = `{platform.os}-{platform.cpu.arch}`
     local mapped = BIN_MAP[store] or store
     local file = `raylib-{RAYLIB_VERSION}_{mapped}`;
+    local lib_name = `raylib-{RAYLIB_VERSION}_{mapped}`;
 
-    if (fs.stat(`{BIN_LOCATION}/{file}.{ffi.suffix}`).kind == "none") then
+    if platform.os == "windows" then
+        lib_name = 'raylib'
+    end
+
+    if (fs.stat(`{BIN_LOCATION}/{lib_name}.{ffi.suffix}`).kind == "none") then
         print(`Downloading '{file}'...`)
 
         local archive: buffer?;
@@ -78,13 +83,13 @@ else
             print(`  It is likely that your platform is not supported.`);
             error("Aborting.");
         end
-
+		
         if zip.is(archive) then
             local files = zip.read(archive);
             for name, data in files do
                 local location = string.sub(name, #file + 1, -1);
                 if (table.find(LIB_PATHS, location)) then
-                    fs.writeFile(`{BIN_LOCATION}/{file}.{ffi.suffix}`, data);
+                    fs.writeFile(`{BIN_LOCATION}/{lib_name}.{ffi.suffix}`, data);
                     break;
                 end
             end
@@ -94,14 +99,13 @@ else
             for name, data in files do
                 local location = string.sub(name, #file + 1, -1);
                 if (table.find(LIB_PATHS, location)) then
-                    fs.writeFile(`{BIN_LOCATION}/{file}.{ffi.suffix}`, data);
+                    fs.writeFile(`{BIN_LOCATION}/{lib_name}.{ffi.suffix}`, data);
                     break;
                 end
             end
         end
     end
-
-    LIBRARY_PATH = `{BIN_LOCATION}/{file}.{ffi.suffix}`;
+    LIBRARY_PATH = `{BIN_LOCATION}/{lib_name}.{ffi.suffix}`;
 end
 
 assert(fs.stat(LIBRARY_PATH).kind == "file", `Raylib library not found at path: {LIBRARY_PATH}`);
